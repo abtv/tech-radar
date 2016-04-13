@@ -1,0 +1,11 @@
+{:topics                 {:clojure    ["clojure" "clojurescript"]
+                          :jvm        ["jvm" "java" "scala lang"]
+                          :javascript ["javascript"]
+                          :golang     ["golang"]
+                          :linux      ["linux"]
+                          :nosql      ["nosql"]
+                          :rust       ["rust lang"]
+                          :jobs       ["job jobs hiring"]}
+ :languages              ["en" "ru"]
+ :max-topics-per-tweet   4
+ :max-hashtags-per-tweet 4}

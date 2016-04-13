@@ -1,0 +1,13 @@
+CREATE TABLE tweets(id SERIAL PRIMARY KEY,
+                    twitter_id varchar(30),
+                    text varchar(300),
+                    created_at timestamp,
+                    retweeted boolean,
+                    user_created_at timestamp,
+                    user_name varchar(300),
+                    user_location varchar(300),
+                    user_description varchar(300),
+                    followers_count int,
+                    friends_count int,
+                    statuses_count int,
+                    user_lang varchar(10));
