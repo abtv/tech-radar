@@ -20,7 +20,7 @@
                  [honeysql "0.6.3"]
                  [clj-dbcp "0.8.1"]
                  [clj-time "0.11.0"]
-                 [com.twitter/hbc-core "2.2.1-SNAPSHOT"]
+                 [com.twitter/hbc-core "2.2.0"]
                  [com.stuartsierra/component "0.3.1"]
                  [reloaded.repl "0.2.1"]
                  [environ "1.0.2"]
