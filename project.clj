@@ -62,11 +62,11 @@
                                                 :output-dir "resources/public/js"}}
                        :release {:source-paths ["src/cljs"]
                                  :compiler     {:optimizations :advanced
-                                                :output-to     "release/main.js"}}}}
+                                                :output-to     "frontend-release/main.js"}}}}
 
   :profiles {:dev     {:env {:host              "localhost"
-                             :port              3000
-                             :database          "jdbc:postgresql://localhost/analytics?user=postgres&password=postgres"
+                             :port              "3000"
+                             :database          "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
                              :twitter-security  "twitter-security.edn"
                              :twitter-settings  "twitter-settings.edn"
                              :classify-settings "classify-settings.edn"}}
@@ -75,8 +75,8 @@
                        :global-vars {;*warn-on-reflection* true
                                      *assert* false}
                        :env         {:host              "0.0.0.0"
-                                     :port              3000
-                                     :database          "jdbc:postgresql://localhost/analytics?user=postgres&password=postgres"
+                                     :port              "3000"
+                                     :database          "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
                                      :twitter-security  "twitter-security.edn"
                                      :twitter-settings  "twitter-settings.edn"
                                      :classify-settings "classify-settings.edn"}}})

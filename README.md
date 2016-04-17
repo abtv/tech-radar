@@ -1,19 +1,54 @@
 # tech-radar
 
-## Description
+## 1. Prerequisites
+* OpenJDK 7 or Oracle JDK 8
+* Leiningen 2.5 or later
+* Git
+* PostgreSQL 9.4 or later
 
-Technology Radar is a web application which helps you to be aware about modern trends in programming. 
-One look is worth thousand words. Just follow to http://tech-radar.github.io
-I prepared this project for my talk `Full stack Clojure in production`. I would appreciate any ideas and questions.
+## 2. PostgreSQL settings
 
-## How to build the app
+Default database is `tech_radar`, default user is `postgres`, default password is `postgres`. 
+You can change these settings with `database` parameter in `project.clj` file (development) and `.lein-env` file (production).
 
-1. install-env.sh contains everything you need to setup environment for tech-radar under Ubuntu server.
-2. build-release-all.sh builds backend and frontend applications and packs them into release.zip file.
-3. tech-radar.conf file contains upstart config
+## 3. Twitter security settings
+
+`tech-radar` receives data from Twitter stream. You need to create a file called `twitter-security.edn` 
+in the project folder with the following content:
+
+```
+{:app-key           "your app key"
+ :app-secret        "your app secret"
+ :user-token        "your user token"
+ :user-token-secret "your user token secret"}
+```
+
+## 4. Build from sources
+
+Clone `tech-radar` repository
+
+```
+git clone git://github.com/abtv/tech-radar.git
+```
+
+Build with `build-release-all.sh` script 
+
+```
+./build-release-all.sh
+```
+
+`frontend-release` folder contains frontend application
+`backend-release` folder contains backend application and all the settings and security files
+
+## 5. Deployment to Ubuntu 14.04 server
+
+1. `deploy/install-env.sh` file contains everything you need to setup environment for tech-radar under Ubuntu server
+2. put `deploy/tech-radar.conf` file to `/etc/init/` folder
+3. copy `backend-release` folder to your server
 
 ## It's not perfect... yet
-I had not so much time to make this project. Backend is mostly ok, but frontend is just a very early implementation. I'm going to use Om.next for frontend.
+Backend is mostly ok, but frontend is just a very early implementation. I'm going to use Om.next for frontend. 
+I would appreciate any help.
 
 ## License
 
