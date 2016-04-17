@@ -7,7 +7,6 @@
             [tech-radar.components.analysis :refer [new-analysis]]
             [tech-radar.components.web-server :refer [new-web-server]]))
 
-;TODO implement metrics component (count of messages in every channel, maybe CPU load, free memory)
 (defn new-system []
   (-> (component/system-map
         :database (new-database)

@@ -1,7 +1,6 @@
 (ns tech-radar.services.metrics
   (:require [clojure.core.async :refer [chan close! go go-loop timeout >! <! >!! <!! alts!]]
             [taoensso.timbre :as timbre]))
-;TODO add logger to file from timbre
 
 (defn- write-metrics [counters]
   (let [m (reduce (fn [m [k v]]

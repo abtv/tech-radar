@@ -13,7 +13,6 @@
       (update-in counters [counter] update-fn)
       (assoc-in counters [counter] init-val))))
 
-;TODO use go-loop + timeout + channel for closing + alts for timbre/info metrics
 (defrecord Metrics [counters stop-fn]
   Counter
   (increment [component counter]

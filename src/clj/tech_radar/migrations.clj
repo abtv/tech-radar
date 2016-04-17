@@ -7,7 +7,6 @@
   {:datastore  (jdbc/sql-database {:connection-uri (env :database)})
    :migrations (jdbc/load-resources "migrations")})
 
-;TODO support UTF-8
 (defn migrate []
   (-> (get-config)
       (repl/migrate)))

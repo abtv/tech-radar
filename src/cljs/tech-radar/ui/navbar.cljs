@@ -1,8 +1,7 @@
 (ns tech-radar.ui.navbar
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :refer-macros [html]]
-            [tech-radar.state :refer [app-state]]
-    #_[tech-radar.ui.svg :refer [images]]))
+            [tech-radar.state :refer [app-state]]))
 
 (defui BrandToggle
   Object
@@ -18,19 +17,6 @@
         [:span.icon-bar]]
        [:a.navbar-brand {:href "#/"} "Tech Radar"]
        [:img {:src "images/radar.svg"}]])))
-
-(defui TopMenuItems
-  Object
-  (render [this]
-    (html
-      [:a {:href   "https://github.com/abtv/tech-radar"
-           :target "_blank"}
-       [:img {:style {:position "absolute"
-                      :top      0
-                      :right    0
-                      :border   0}
-              :src   "images/fork-me.png"
-              :alt   "Fork me on GitHub"}]])))
 
 (defui MenuItem
   Object
@@ -55,7 +41,6 @@
           (map menu-item menu-items)]]))))
 
 (def brand-toggle (om/factory BrandToggle))
-(def top-menu-items (om/factory TopMenuItems))
 (def sidebar-menu-items (om/factory SidebarMenuItems))
 
 (defui NavBar
@@ -64,7 +49,6 @@
     (let [props (om/props this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
-             (top-menu-items)
              (sidebar-menu-items props)]))))
 
 (def nav-bar (om/factory NavBar))
