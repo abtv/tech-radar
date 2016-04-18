@@ -30,9 +30,17 @@
   <script src="vendor/jquery.js"></script>
   <script src="vendor/bootstrap.min.js"></script>
 
-  <script src="vendor/d3js.org/d3.v3.min.js"></script>
-  <script src="vendor/dimplejs.org/dist/dimple.v2.2.0.min.js"></script>
+  <script src="vendor/d3.v3.min.js"></script>
+  <script src="vendor/dimple.v2.2.0.min.js"></script>
 
   <script src="main.js"></script>
+
+  <script>
+      $(document).ready(function () {
+        $(".navbar-nav li a").click(function(event) {
+          $(".navbar-collapse").collapse('hide');
+        });
+      });
+  </script>
 </body>
 </html>

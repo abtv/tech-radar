@@ -1,6 +1,6 @@
 /*!
  * Start Bootstrap - SB Admin Bootstrap Admin Template (http://startbootstrap.com)
- * Code licensed under the Apache License v2.0.
+ * Code licensed under the Apach/e License v2.0.
  * For details, see http://www.apache.org/licenses/LICENSE-2.0.
  */
 
@@ -34,7 +34,7 @@ body {
 
 @media(min-width:768px) {
     #wrapper {
-        padding-left: 80px;
+        padding-left: 101px;
     }
 
     #page-wrapper {
@@ -116,9 +116,9 @@ ul.alert-dropdown {
     .side-nav {
         position: fixed;
         top: 51px;
-        left: 80px;
-        width: 80px;
-        margin-left: -80px;
+        left: 101px;
+        width: 101px;
+        margin-left: -101px;
         border: none;
         border-radius: 0;
         overflow-y: auto;
@@ -129,7 +129,7 @@ ul.alert-dropdown {
     }
 
     .side-nav>li>a {
-        width: 80px;
+        width: 101px;
     }
 
     .side-nav li a:hover,
@@ -152,18 +152,6 @@ ul.alert-dropdown {
 
 .side-nav>li>ul>li>a:hover {
     color: #fff;
-}
-
-/* Flot Chart Containers */
-
-.flot-chart {
-    display: block;
-    height: 400px;
-}
-
-.flot-chart-content {
-    width: 100%;
-    height: 100%;
 }
 
 /* Custom Colored Panels */

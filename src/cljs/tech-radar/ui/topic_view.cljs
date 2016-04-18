@@ -47,7 +47,9 @@
         [:div.container-fluid {}
          [:div {:class "row"}
           [:div {:class "col-lg-12"}
-           [:h2 {} name]
+           [:h1 {:class "page-header"} name]]]
+         [:div {:class "row"}
+          [:div {:class "col-lg-12"}
            [:div {:class "table-responsive"}
             [:table {:class "table table-bordered table-hover table-striped"}
              [:thead {}
@@ -57,8 +59,8 @@
                [:th {} "Status"]]]
              [:tbody
               (->> texts
-                   (map topic-item)
-                   (take 25))]]]]]]))))
+                   (take 25)
+                   (mapv topic-item))]]]]]]))))
 
 (def topic-view (om/factory TopicView))
 

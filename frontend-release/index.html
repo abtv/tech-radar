@@ -34,5 +34,12 @@
 <script src="vendor/dimple.v2.2.0.min.js"></script>
 
 <script src="main.js"></script>
+<script>
+      $(document).ready(function () {
+        $(".navbar-nav li a").click(function(event) {
+          $(".navbar-collapse").collapse('hide');
+        });
+      });
+  </script>
 </body>
 </html>

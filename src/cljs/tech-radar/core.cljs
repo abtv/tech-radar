@@ -18,8 +18,8 @@
               (cond
                 (= current-screen :trends) (trends-view {:charts (->> menu-items
                                                                       (map (fn [item]
-                                                                            (select-keys item [:id :name]))))
-                                                        :trends  trends})
+                                                                             (select-keys item [:id :name]))))
+                                                         :trends trends})
                 :else (topic-view {:language current-screen
                                    :texts    (current-screen topics)
                                    :name     (->> menu-items
