@@ -46,8 +46,12 @@ Build with `build-release-all.sh` script
 2. put `deploy/tech-radar.conf` file to `/etc/init/` folder
 3. copy `backend-release` folder to your server
 
-## It's not perfect... yet
-Backend is mostly ok, but frontend is just a very early implementation. I'm going to use Om.next for frontend. 
+## 6. Future work
+
+1. Make more backend tests, at least analysis tests
+2. Use Om.Next for frontend
+3. Make frontend tests
+
 I would appreciate any help.
 
 ## License
