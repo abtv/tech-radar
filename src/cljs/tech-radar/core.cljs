@@ -8,25 +8,26 @@
             [tech-radar.history :refer [init-history]]
             [tech-radar.routes :refer [init-routes]]))
 
+(defn- topic-name [topic-items current-screen]
+  (->> topic-items
+       (filter (fn [{id :id}]
+                 (= id current-screen)))
+       (first)
+       (:name)))
+
 (defui RootComponent
   Object
   (render [this]
-    (let [{:keys [current-screen menu-items topics trends]} (om/props this)]
+    (let [{:keys [current-screen topic-items topics trends] :as props} (om/props this)]
       (html [:div#wrapper {}
-             (nav-bar {:menu-items menu-items})
+             (nav-bar (select-keys props [:topic-items]))
              [:div#page-wrapper {}
               (cond
-                (= current-screen :trends) (trends-view {:charts (->> menu-items
-                                                                      (map (fn [item]
-                                                                             (select-keys item [:id :name]))))
+                (= current-screen :trends) (trends-view {:charts topic-items
                                                          :trends trends})
-                :else (topic-view {:language current-screen
-                                   :texts    (current-screen topics)
-                                   :name     (->> menu-items
-                                                  (filter (fn [{id :id}]
-                                                            (= id current-screen)))
-                                                  (first)
-                                                  (:name))}))]]))))
+                (topics current-screen) (topic-view {:language current-screen
+                                                     :texts    (current-screen topics)
+                                                     :name     (topic-name topic-items current-screen)}))]]))))
 
 (init-routes)
 (init-history)

@@ -4,7 +4,7 @@
             [clojure.core.async :refer [chan sliding-buffer close!]]
             [taoensso.timbre :as timbre]
             [tech-radar.utils.settings :refer [load-twitter-security
-                                              load-twitter-settings]]))
+                                               load-twitter-settings]]))
 
 (defrecord Loader [database metrics input-chan tweet-chan cancel-fn]
   component/Lifecycle
@@ -17,14 +17,14 @@
               {:keys [app-key app-secret user-token user-token-secret]} (load-twitter-security)
               input-chan (chan (sliding-buffer 10))
               tweet-chan (chan 10)
-              cancel-fn  (run {:track                             track
-                                               :input-chan        input-chan
-                                               :tweet-chan        tweet-chan
-                                               :app-key           app-key
-                                               :app-secret        app-secret
-                                               :user-token        user-token
-                                               :user-token-secret user-token-secret
-                                               :metrics           metrics})]
+              cancel-fn  (run {:track             track
+                               :input-chan        input-chan
+                               :tweet-chan        tweet-chan
+                               :app-key           app-key
+                               :app-secret        app-secret
+                               :user-token        user-token
+                               :user-token-secret user-token-secret
+                               :metrics           metrics})]
           (assoc component :input-chan input-chan
                            :tweet-chan tweet-chan
                            :cancel-fn cancel-fn)))))

@@ -24,8 +24,6 @@
                                                                       :as  tweet}]
   (let [topics* (->> (classify text indexed-topics)
                      (take max-topics-per-tweet))]
-    (when-not (seq topics*)
-      (timbre/warn (str "Can't classify text: \"" text "\"")))
     (assoc tweet :topics topics*)))
 
 (defn- remove-hash-sign [hashtag]

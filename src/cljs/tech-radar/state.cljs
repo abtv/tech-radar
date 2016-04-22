@@ -2,7 +2,7 @@
 
 (defonce app-state (atom {:current-screen :trends
                           :msg            "Hello Om.Next world!"
-                          :menu-items     [{:id   :jobs
+                          :topic-items    [{:id   :jobs
                                             :href "#/topic/jobs"
                                             :name "Jobs"}
                                            {:id   :clojure

@@ -31,6 +31,8 @@
     (loop []
       (when-let [tweet (<!! analysis-chan)]
         (decrement metrics :analysis-chan)
+        (when-not (seq (:topics tweet))
+          (timbre/warn (str "Can't classify text: \"" (:text tweet) "\"")))
         (add model tweet)
         (increment metrics :total-texts)
         (recur)))

@@ -26,7 +26,7 @@
     (catch Exception ex
       (timbre/error (.getMessage ex)))))
 
-(defn run-saver [{:keys [save-chan analysis-chan metrics database]}]
+(defn run [{:keys [save-chan analysis-chan metrics database]}]
   (thread
     (timbre/info "saver started")
     (loop []

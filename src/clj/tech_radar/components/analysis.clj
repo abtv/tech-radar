@@ -12,7 +12,7 @@
                                                     trends
                                                     topic]]))
 
-(defrecord Analysis [database metrics processor get-trends-fn get-texts-fn]
+(defrecord Analysis [database metrics preprocessor get-trends-fn get-texts-fn]
   component/Lifecycle
   (start [component]
     (if get-trends-fn
@@ -32,7 +32,7 @@
               initial-data          (load-data database topics load-data-hours)]
           (init model initial-data)
           (run {:model         model
-                :analysis-chan (:analysis-chan processor)
+                :analysis-chan (:analysis-chan preprocessor)
                 :metrics       metrics})
           (assoc component :get-trends-fn (fn []
                                             (trends model))
