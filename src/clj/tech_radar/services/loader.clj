@@ -16,7 +16,7 @@
            (com.twitter.hbc.core.processor StringDelimitedProcessor)
            (com.twitter.hbc.httpclient BasicClient)))
 
-(defn new-endpoint [terms]
+(defn- new-endpoint [terms]
   (let [end-point (StatusesFilterEndpoint.)
         terms*    (java.util.ArrayList.)]
     (doseq [term terms]
@@ -25,7 +25,7 @@
     (.filterLevel end-point Constants$FilterLevel/None)
     end-point))
 
-(defn ^BasicClient new-client [{:keys [queue end-point auth]}]
+(defn- ^BasicClient new-client [{:keys [queue end-point auth]}]
   (let [cb (doto (ClientBuilder.)
              (.hosts Constants/STREAM_HOST)
              (.endpoint end-point)
@@ -40,10 +40,10 @@
       (timbre/error ex (str "decode tweet error: " msg))
       nil)))
 
-(defn- run [{:keys [track
-                    tweet-chan should-work
-                    app-key app-secret user-token user-token-secret
-                    metrics]}]
+(defn- run-loader-worker [{:keys [track
+                                  tweet-chan should-work
+                                  app-key app-secret user-token user-token-secret
+                                  metrics]}]
   (thread
     (timbre/info "twitter loader started")
     (try
@@ -66,10 +66,10 @@
         (timbre/error ex "twitter-loader exception")))
     (timbre/info "twitter loader finished")))
 
-(defn run-statuses-filter [params]
+(defn run [params]
   (let [should-work (atom true)
         params*     (assoc params :should-work should-work)
-        worker      (run params*)]
+        worker      (run-loader-worker params*)]
     (fn []
       (reset! should-work false)
       (<!! worker))))

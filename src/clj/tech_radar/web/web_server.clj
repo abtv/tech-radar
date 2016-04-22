@@ -1,8 +1,8 @@
-(ns tech-radar.services.web-server
+(ns tech-radar.web.web-server
   (:require [bidi.bidi :as bidi]
             [bidi.ring :as bidi-ring]
-            [tech-radar.services.resources :refer [trends-resource
-                                                  topic-resource]]))
+            [tech-radar.web.resources :refer [trends-resource
+                                              topic-resource]]))
 
 (defn- create-resources [analysis]
   {:trends (trends-resource analysis)

@@ -1,11 +1,9 @@
 (ns tech-radar.components.database
-  (:require [tech-radar.services.loader :refer [run-statuses-filter]]
-            [com.stuartsierra.component :as component]
-            [clojure.core.async :refer [chan close!]]
+  (:require [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre]
             [clj-dbcp.core :as cp]
             [environ.core :refer [env]]
-            [tech-radar.migrations :refer [migrate]]))
+            [tech-radar.database.migrations :refer [migrate]]))
 
 (defrecord Database [database]
   component/Lifecycle

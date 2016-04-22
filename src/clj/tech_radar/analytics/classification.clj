@@ -1,4 +1,4 @@
-(ns tech-radar.services.classifier
+(ns tech-radar.analytics.classification
   (:require [clojure.set :refer [intersection]]))
 
 (def word #"[\w\-]+")

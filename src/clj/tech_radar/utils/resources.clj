@@ -1,4 +1,4 @@
-(ns tech-radar.services.resources
+(ns tech-radar.utils.resources
   (:require [taoensso.timbre :as timbre]
             [liberator.core :refer [resource]]
             [cognitect.transit :as transit])
@@ -16,7 +16,7 @@
     (fn [v] (-> ^ReadableInstant v .getMillis))
     (fn [v] (-> ^ReadableInstant v .getMillis .toString))))
 
-(defn write [x]
+(defn- write [x]
   (let [baos (ByteArrayOutputStream.)
         w    (transit/writer baos :json {:handlers {DateTime joda-time-writer}})
         _    (transit/write w x)
@@ -35,13 +35,3 @@
    :available-media-types available-media-types
    :as-response           as-response
    :handle-exception      handle-exception})
-
-(defn trends-resource [{:keys [get-trends-fn] :as analysis}]
-  (resource-handler entry-params
-                    :handle-ok (fn [ctx]
-                                 (get-trends-fn))))
-
-(defn topic-resource [{:keys [get-texts-fn] :as analysis}]
-  (resource-handler entry-params
-                    :handle-ok (fn [{{{topic :topic} :params} :request :as ctx}]
-                                 (get-texts-fn topic))))

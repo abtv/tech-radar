@@ -1,13 +1,8 @@
-(ns tech-radar.services.processor
-  (:require [clojure.core.async :refer [thread chan <!! >!! close!]]
-            [clojure.string]
-            [taoensso.timbre :as timbre]
-            [tech-radar.components.counter :refer [increment
-                                                   decrement]]
-            [tech-radar.utils.parsers :refer [parse-twitter-date]]
-            [tech-radar.services.classifier :refer [classify
-                                                    get-hashtags]]
-            [tech-radar.services.saver :refer [run-saver]]))
+(ns tech-radar.analytics.preprocessing
+  (:require [taoensso.timbre :as timbre]
+            [tech-radar.analytics.classification :refer [classify
+                                                         get-hashtags]]
+            [tech-radar.utils.parsers :refer [parse-twitter-date]]))
 
 (defn- streamed-tweet->tweet [{:keys [id-str text created-at retweeted user]}]
   {:twitter-id       id-str
@@ -45,32 +40,10 @@
        (take max-hashtags-per-tweet)
        (assoc tweet :hashtags)))
 
-(defn- stream-processor [{:keys [indexed-topics
-                                 max-topics-per-tweet
-                                 max-hashtags-per-tweet]}]
+(defn stream-preprocessor [{:keys [indexed-topics
+                                   max-topics-per-tweet
+                                   max-hashtags-per-tweet]}]
   (comp (filter identity)
         (map streamed-tweet->tweet)
         (map (partial enrich-tweet-with-topics indexed-topics max-topics-per-tweet))
         (map (partial enrich-tweet-with-hashtags max-hashtags-per-tweet))))
-
-(defn run-tweet-processing [{:keys [tweet-chan analysis-chan metrics languages database] :as params}]
-  (thread
-    (timbre/info "twit-processing started")
-    (let [save-chan (->> (stream-processor params)
-                         (chan 10))]
-      (run-saver {:save-chan     save-chan
-                  :analysis-chan analysis-chan
-                  :metrics       metrics
-                  :database      database})
-      (loop []
-        (when-let [tweet (<!! tweet-chan)]
-          (decrement metrics :tweet-chan)
-          (when (-> tweet
-                    (:user)
-                    (:lang)
-                    (languages))
-            (increment metrics :save-chan)
-            (>!! save-chan tweet))
-          (recur)))
-      (close! save-chan))
-    (timbre/info "twit-processing finished")))

@@ -1,4 +1,4 @@
-(ns tech-radar.migrations
+(ns tech-radar.database.migrations
   (:require [environ.core :refer [env]]
             [ragtime.jdbc :as jdbc]
             [ragtime.repl :as repl]))

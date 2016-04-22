@@ -1,5 +1,5 @@
 (ns tech-radar.components.loader
-  (:require [tech-radar.services.loader :refer [run-statuses-filter]]
+  (:require [tech-radar.services.loader :refer [run]]
             [com.stuartsierra.component :as component]
             [clojure.core.async :refer [chan sliding-buffer close!]]
             [taoensso.timbre :as timbre]
@@ -17,7 +17,7 @@
               {:keys [app-key app-secret user-token user-token-secret]} (load-twitter-security)
               input-chan (chan (sliding-buffer 10))
               tweet-chan (chan 10)
-              cancel-fn  (run-statuses-filter {:track             track
+              cancel-fn  (run {:track                             track
                                                :input-chan        input-chan
                                                :tweet-chan        tweet-chan
                                                :app-key           app-key

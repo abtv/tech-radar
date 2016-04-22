@@ -1,6 +1,12 @@
 (ns tech-radar.utils.parsers
   (:require [clj-time.core :as time]))
 
+(defn parse-int [v]
+  (when v
+    (or (and (string? v)
+             (Integer/parseInt v))
+        v)))
+
 (def months {"Jan" 1
              "Feb" 2
              "Mar" 3

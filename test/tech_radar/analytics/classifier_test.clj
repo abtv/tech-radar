@@ -1,8 +1,8 @@
-(ns tech-radar.services.classifier-test
+(ns tech-radar.analytics.classifier-test
   (:require [clojure.test :refer :all]
-            [tech-radar.services.classifier :refer [index-topics
-                                                   classify
-                                                   get-hashtags]]))
+            [tech-radar.analytics.classification :refer [index-topics
+                                                         classify
+                                                         get-hashtags]]))
 
 (deftest index-topics-test
   (let [topics         {:jvm     ["JVM" "scala lang" "java"]

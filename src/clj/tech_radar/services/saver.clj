@@ -9,38 +9,10 @@
                                                map->db-fn]]
             [taoensso.timbre :as timbre]
             [tech-radar.components.counter :refer [increment
-                                                   decrement]]))
-
-(def tweet->db (map->db-fn {:date-columns #{:created-at
-                                            :user-created-at}}))
-
-(def hashtag->db (map->db-fn {:date-columns #{:created-at}}))
-
-(def topic->db (map->db-fn {:date-columns #{:created-at}}))
-
-(defn- insert-tweet [tweet database]
-  (let [data (jdbc/insert! database :tweets (-> tweet
-                                                (dissoc :hashtags :topics)
-                                                (tweet->db)) :entities to-underscores)]
-    (-> data
-        (first)
-        (:id))))
-
-(defn- insert-tweet-hashtags [{:keys [created-at topic hashtags]} database]
-  (let [hashtags* (map (fn [hashtag]
-                         {:created-at created-at
-                          :topic      (name topic)
-                          :hashtag    hashtag}) hashtags)]
-    (doseq [hashtag hashtags*]
-      (jdbc/insert! database :hashtags (hashtag->db hashtag) :entities to-underscores))))
-
-(defn- insert-tweet-topics [{:keys [tweet-id created-at topics]} database]
-  (let [topics* (map (fn [topic]
-                       {:tweet-id   tweet-id
-                        :created-at created-at
-                        :topic      (name topic)}) topics)]
-    (doseq [topic topics*]
-      (jdbc/insert! database :topics (topic->db topic) :entities to-underscores))))
+                                                   decrement]]
+            [tech-radar.database.database :refer [insert-tweet
+                                                  insert-tweet-hashtags
+                                                  insert-tweet-topics]]))
 
 (defn- save-tweet [database tweet]
   (try

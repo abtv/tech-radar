@@ -7,8 +7,10 @@
                     (str m "\n" k ": " v)) "" @counters)]
     (timbre/info m)))
 
-(defn run-metrics [counters]
-  (let [write-timeout 10000
+(defn run-metrics [counters metrics-timeout-s]
+  (when-not metrics-timeout-s
+    (throw (Exception. "you have to provide metrics-timeout-s param")))
+  (let [write-timeout (* 1000 metrics-timeout-s)
         write-chan    (chan)
         process       (go-loop []
                         (let [value (<! write-chan)]

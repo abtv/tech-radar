@@ -4,15 +4,10 @@
             [immutant.web.undertow :as undertow]
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
-            [tech-radar.services.web-server :refer [create-ring-handler
-                                                   allow-cross-origin]]
-            [compojure.handler :refer [site]]))
-
-(defn parse-int [v]
-  (when v
-    (or (and (string? v)
-             (Integer/parseInt v))
-        v)))
+            [tech-radar.web.web-server :refer [create-ring-handler
+                                               allow-cross-origin]]
+            [compojure.handler :refer [site]]
+            [tech-radar.utils.parsers :refer [parse-int]]))
 
 (defrecord WebServer [database metrics analysis web-server]
   component/Lifecycle

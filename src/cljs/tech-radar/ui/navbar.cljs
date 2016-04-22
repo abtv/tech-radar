@@ -24,45 +24,45 @@
     (html
       [:ul {:class "nav navbar-right top-nav"}
        #_[:li {:class "dropdown"}
-        [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown"}
-         [:i {:class "fa fa-envelope"}]
-         [:b {:class "caret"}]]
-        [:ul {:class "dropdown-menu message-dropdown"}
-         [:li {:class "message-preview"}
-          [:a {:href "#"}
-           [:div {:class "media"}
-            [:span {:class "pull-left"}
-             [:img {:class "media-object", :src "http://placehold.it/50x50"}]]
-            [:div {:class "media-body"}
-             [:h5 {:class "media-heading"}
-              [:strong "John Smith"]]
-             [:p {:class "small text-muted"}
-              [:i {:class "fa fa-clock-o"}] " Yesterday at 4:32 PM"]
-             [:p "Lorem ipsum dolor sit amet, consectetur..."]]]]]
-         [:li {:class "message-preview"}
-          [:a {:href "#"}
-           [:div {:class "media"}
-            [:span {:class "pull-left"}
-             [:img {:class "media-object", :src "http://placehold.it/50x50"}]]
-            [:div {:class "media-body"}
-             [:h5 {:class "media-heading"}
-              [:strong "John Smith"]]
-             [:p {:class "small text-muted"}
-              [:i {:class "fa fa-clock-o"}] " Yesterday at 4:32 PM"]
-             [:p "Lorem ipsum dolor sit amet, consectetur..."]]]]]
-         [:li {:class "message-preview"}
-          [:a {:href "#"}
-           [:div {:class "media"}
-            [:span {:class "pull-left"}
-             [:img {:class "media-object", :src "http://placehold.it/50x50"}]]
-            [:div {:class "media-body"}
-             [:h5 {:class "media-heading"}
-              [:strong "John Smith"]]
-             [:p {:class "small text-muted"}
-              [:i {:class "fa fa-clock-o"}] " Yesterday at 4:32 PM"]
-             [:p "Lorem ipsum dolor sit amet, consectetur..."]]]]]
-         [:li {:class "message-footer"}
-          [:a {:href "#"} "Read All New Messages"]]]]
+          [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown"}
+           [:i {:class "fa fa-envelope"}]
+           [:b {:class "caret"}]]
+          [:ul {:class "dropdown-menu message-dropdown"}
+           [:li {:class "message-preview"}
+            [:a {:href "#"}
+             [:div {:class "media"}
+              [:span {:class "pull-left"}
+               [:img {:class "media-object", :src "http://placehold.it/50x50"}]]
+              [:div {:class "media-body"}
+               [:h5 {:class "media-heading"}
+                [:strong "John Smith"]]
+               [:p {:class "small text-muted"}
+                [:i {:class "fa fa-clock-o"}] " Yesterday at 4:32 PM"]
+               [:p "Lorem ipsum dolor sit amet, consectetur..."]]]]]
+           [:li {:class "message-preview"}
+            [:a {:href "#"}
+             [:div {:class "media"}
+              [:span {:class "pull-left"}
+               [:img {:class "media-object", :src "http://placehold.it/50x50"}]]
+              [:div {:class "media-body"}
+               [:h5 {:class "media-heading"}
+                [:strong "John Smith"]]
+               [:p {:class "small text-muted"}
+                [:i {:class "fa fa-clock-o"}] " Yesterday at 4:32 PM"]
+               [:p "Lorem ipsum dolor sit amet, consectetur..."]]]]]
+           [:li {:class "message-preview"}
+            [:a {:href "#"}
+             [:div {:class "media"}
+              [:span {:class "pull-left"}
+               [:img {:class "media-object", :src "http://placehold.it/50x50"}]]
+              [:div {:class "media-body"}
+               [:h5 {:class "media-heading"}
+                [:strong "John Smith"]]
+               [:p {:class "small text-muted"}
+                [:i {:class "fa fa-clock-o"}] " Yesterday at 4:32 PM"]
+               [:p "Lorem ipsum dolor sit amet, consectetur..."]]]]]
+           [:li {:class "message-footer"}
+            [:a {:href "#"} "Read All New Messages"]]]]
        [:li {:class "dropdown"}
         [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown", :aria-expanded "false"}
          [:i {:class "fa fa-gear"} " records per page "]
@@ -90,23 +90,23 @@
          [:li
           [:a {:href "#"} "View All"]]]]
        #_[:li {:class "dropdown"}
-        [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown", :aria-expanded "false"}
-         [:i {:class "fa fa-user"}] " John Smith "
-         [:b {:class "caret"}]]
-        [:ul {:class "dropdown-menu"}
-         [:li
-          [:a {:href "#"}
-           [:i {:class "fa fa-fw fa-user"}] " Profile"]]
-         [:li
-          [:a {:href "#"}
-           [:i {:class "fa fa-fw fa-envelope"}] " Inbox"]]
-         [:li
-          [:a {:href "#"}
-           [:i {:class "fa fa-fw fa-gear"}] " Settings"]]
-         [:li {:class "divider"}]
-         [:li
-          [:a {:href "#"}
-           [:i {:class "fa fa-fw fa-power-off"}] " Log Out"]]]]])))
+          [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown", :aria-expanded "false"}
+           [:i {:class "fa fa-user"}] " John Smith "
+           [:b {:class "caret"}]]
+          [:ul {:class "dropdown-menu"}
+           [:li
+            [:a {:href "#"}
+             [:i {:class "fa fa-fw fa-user"}] " Profile"]]
+           [:li
+            [:a {:href "#"}
+             [:i {:class "fa fa-fw fa-envelope"}] " Inbox"]]
+           [:li
+            [:a {:href "#"}
+             [:i {:class "fa fa-fw fa-gear"}] " Settings"]]
+           [:li {:class "divider"}]
+           [:li
+            [:a {:href "#"}
+             [:i {:class "fa fa-fw fa-power-off"}] " Log Out"]]]]])))
 
 (def navbar-right (om/factory NavbarRight))
 
