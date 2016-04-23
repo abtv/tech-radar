@@ -8,9 +8,7 @@
 
 (defn- topic-name [topic-items current-screen]
   (->> topic-items
-       (filter (fn [{id :id}]
-                 (= id current-screen)))
-       (first)
+       (current-screen)
        (:name)))
 
 (defmulti screen (fn [props]

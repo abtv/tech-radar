@@ -58,7 +58,7 @@
       (html
         [:div.collapse.navbar-collapse.navbar-ex1-collapse {}
          [:ul.nav.navbar-nav.side-nav {}
-          (mapv menu-item topic-items)]]))))
+          (mapv (comp menu-item second) topic-items)]]))))
 
 (def brand-toggle (om/factory BrandToggle))
 (def sidebar-menu-items (om/factory SidebarMenuItems))

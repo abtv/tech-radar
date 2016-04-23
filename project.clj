@@ -31,6 +31,7 @@
                  [org.omcljs/om "1.0.0-alpha31"]
                  [sablono "0.6.2"]
                  [cljs-ajax "0.5.4"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
                  [figwheel-sidecar "0.5.0-6"]
                  [com.cemerick/piggieback "0.2.1"]
                  [secretary "1.2.3"]

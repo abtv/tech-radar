@@ -3,10 +3,12 @@
             [sablono.core :refer-macros [html]]
             [tech-radar.ui.loading-view :refer [loading-view]]))
 
+(def max-chart-items 25)
+
 (defn- limit [data]
   (->> data
        (sort-by :count (comp - compare))
-       (take 25)))
+       (take max-chart-items)))
 
 (defn- draw-chart [data {:keys [id width height chart]}]
   (let [limit-data   (limit data)
@@ -36,6 +38,12 @@
             :y-axis  "hashtag"
             :name    name}})
 
+(defn get-div-dimensions [id]
+  (let [e (.getElementById js/document id)
+        x (.-clientWidth e)
+        y (.-clientHeight e)]
+    {:width x :height y}))
+
 (defui Chart
   Object
   (componentDidMount [this]
@@ -50,6 +58,12 @@
           (.removeChild n (.-lastChild n))))
       (when data
         (draw-chart data params))))
+  #_(componentWillMount [this]
+    (.addEventListener js/window
+                       "resize" (fn []
+                                  (let [{:keys [width height]} (get-div-dimensions "charts-view")]
+                                    (js/console.log width)
+                                    #_(om/update cursor :div {:width width :height height})))))
   (render [this]
     (let [props (om/props this)]
       (html
@@ -61,18 +75,18 @@
   Object
   (render [this]
     (let [{:keys [charts trends]} (om/props this)
-          width  600
+          width  400
           height 400]
       (html
-        [:div
+        [:div {:id "charts-view"}
          (->> charts
               (partition-all 2)
               (map-indexed (fn [idx items]
                              [:div.row {:key (str "radar_" idx)}
                               (->> items
-                                   (map (fn [{:keys [id name]}]
+                                   (map (fn [[id {:keys [name]}]]
                                           [:div.col-lg-6
-                                           (if-let [data (id trends)]
+                                           (when-let [data (id trends)]
                                              (chart {:id     (cljs.core/name id)
                                                      :name   name
                                                      :data   data

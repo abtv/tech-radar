@@ -1,7 +1,8 @@
 (ns tech-radar.services.trends
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [chan close! <! put!]]
-            [tech-radar.services.web :refer [web]]))
+            [tech-radar.services.web :refer [web]]
+            [cljs-time.core :as t]))
 
 (defn- convert [hashtags]
   (mapv (fn [[hashtag count]]
