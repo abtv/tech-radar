@@ -43,7 +43,7 @@
 (defui TableView
   Object
   (render [this]
-    (let [{:keys [texts]} (om/props this)]
+    (let [{:keys [texts records-per-page]} (om/props this)]
       (html
         [:div {:class "table-responsive"}
          [:table {:class "table table-bordered table-hover table-striped"}
@@ -54,7 +54,7 @@
             [:th {} "Status"]]]
           [:tbody
            (->> texts
-                (take 25)
+                (take records-per-page)
                 (mapv topic-item))]]]))))
 
 (def table-view (om/factory TableView))
@@ -62,7 +62,7 @@
 (defui TopicView
   Object
   (render [this]
-    (let [{:keys [name texts]} (om/props this)]
+    (let [{:keys [name texts records-per-page]} (om/props this)]
       (html
         [:div.container-fluid {}
          [:div {:class "row"}
@@ -71,7 +71,8 @@
          [:div {:class "row"}
           [:div {:class "col-lg-12"}
            (if (seq texts)
-             (table-view {:texts texts})
+             (table-view {:texts            texts
+                          :records-per-page records-per-page})
              (loading-view {:text "Loading texts, please wait."}))]]]))))
 
 (def topic-view (om/factory TopicView))

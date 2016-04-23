@@ -21,16 +21,21 @@
 (defui NavbarRight
   Object
   (render [this]
-    (html
-      [:ul {:class "nav navbar-right top-nav"}
-       [:li {:class "dropdown"}
-        [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown", :aria-expanded "false"}
-         [:i {:class "fa fa-gear"} " records per page "]
-         [:b {:class "caret"}]]
-        [:ul {:class "dropdown-menu "}
-         (mapv (fn [records-count]
-                 [:li {:key (str "records_count_" records-count)}
-                  [:a {:href "#"} records-count]]) [10 25 50])]]])))
+    (let [{:keys [records-per-page]} (om/props this)]
+      (html
+        [:ul {:class "nav navbar-right top-nav"}
+         [:li {:class "dropdown"}
+          [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown", :aria-expanded "false"}
+           [:i {:class "fa fa-gear"} " records per page "]
+           [:b {:class "caret"}]]
+          [:ul {:class "dropdown-menu "}
+           (mapv (fn [records-count]
+                   [:li {:class (if (= records-per-page records-count)
+                                  "active"
+                                  nil)
+                         :key   (str "records_count_" records-count)}
+                    [:a {:on-click (fn [e]
+                                     (js/console.log "click"))} records-count]]) [10 25 50])]]]))))
 
 (def navbar-right (om/factory NavbarRight))
 
@@ -64,7 +69,7 @@
     (let [props (om/props this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
-             (navbar-right)
+             (navbar-right props)
              (sidebar-menu-items props)]))))
 
 (def nav-bar (om/factory NavBar))

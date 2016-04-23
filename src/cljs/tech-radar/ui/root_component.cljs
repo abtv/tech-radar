@@ -20,15 +20,16 @@
   (trends-view {:charts topic-items
                 :trends trends}))
 
-(defmethod screen :topic [{:keys [current-topic topics topic-items]}]
-  (topic-view {:texts (current-topic topics)
-               :name  (topic-name topic-items current-topic)}))
+(defmethod screen :topic [{:keys [current-topic topics topic-items records-per-page]}]
+  (topic-view {:texts            (current-topic topics)
+               :name             (topic-name topic-items current-topic)
+               :records-per-page records-per-page}))
 
 (defui RootComponent
   Object
   (render [this]
-    (let [{:keys [topic-items] :as props} (om/props this)]
+    (let [props (om/props this)]
       (html [:div#wrapper {}
-             (nav-bar {:topic-items topic-items})
+             (nav-bar props)
              [:div#page-wrapper {}
               (screen props)]]))))
