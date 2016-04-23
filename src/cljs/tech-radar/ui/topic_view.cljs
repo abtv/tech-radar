@@ -2,7 +2,8 @@
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :refer-macros [html]]
             [tech-radar.state :refer [app-state]]
-            [tech-radar.utils.text-formatter :refer [format]]))
+            [tech-radar.utils.text-formatter :refer [format]]
+            [tech-radar.ui.loading-view :refer [loading-view]]))
 
 (defn- format-time-number [n]
   (if (< n 10)
@@ -39,6 +40,25 @@
 
 (def topic-item (om/factory TopicItem {:keyfn :id}))
 
+(defui TableView
+  Object
+  (render [this]
+    (let [{:keys [texts]} (om/props this)]
+      (html
+        [:div {:class "table-responsive"}
+         [:table {:class "table table-bordered table-hover table-striped"}
+          [:thead {}
+           [:tr {}
+            [:th {} "Time"]
+            [:th {} "Text"]
+            [:th {} "Status"]]]
+          [:tbody
+           (->> texts
+                (take 25)
+                (mapv topic-item))]]]))))
+
+(def table-view (om/factory TableView))
+
 (defui TopicView
   Object
   (render [this]
@@ -51,18 +71,8 @@
          [:div {:class "row"}
           [:div {:class "col-lg-12"}
            (if (seq texts)
-             [:div {:class "table-responsive"}
-              [:table {:class "table table-bordered table-hover table-striped"}
-               [:thead {}
-                [:tr {}
-                 [:th {} "Time"]
-                 [:th {} "Text"]
-                 [:th {} "Status"]]]
-               [:tbody
-                (->> texts
-                     (take 25)
-                     (mapv topic-item))]]])
-           ]]]))))
+             (table-view {:texts texts})
+             (loading-view {:text "Loading texts, please wait."}))]]]))))
 
 (def topic-view (om/factory TopicView))
 

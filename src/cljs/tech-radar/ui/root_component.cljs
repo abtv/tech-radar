@@ -13,37 +13,22 @@
        (first)
        (:name)))
 
-#_(defmulti screen (fn [props]
-                     :trends
-                     #_(:current-screen props)))
+(defmulti screen (fn [props]
+                   (:current-screen props)))
 
-#_(defmethod screen :trends
-    (fn [obj]
-      []
-      #_(html
-          [:div
-           (trends-view {:charts topic-items
-                         :trends trends})])))
-;
-;(defmethod screen :topic (fn [{:keys [current-screen topics topic-items]}]
-;                           (topic-view {:language current-screen
-;                                        :texts    (current-screen topics)
-;                                        :name     (topic-name topic-items current-screen)})))
-;
-;(defmethod screen :default (fn [props]
-;
-;                             ))
+(defmethod screen :trends [{:keys [topic-items trends]}]
+  (trends-view {:charts topic-items
+                :trends trends}))
+
+(defmethod screen :topic [{:keys [current-topic topics topic-items]}]
+  (topic-view {:texts (current-topic topics)
+               :name  (topic-name topic-items current-topic)}))
 
 (defui RootComponent
   Object
   (render [this]
-    (let [{:keys [current-screen topics trends topic-items current-topic] :as props} (om/props this)]
+    (let [{:keys [topic-items] :as props} (om/props this)]
       (html [:div#wrapper {}
-             (nav-bar (select-keys props [:topic-items]))
+             (nav-bar {:topic-items topic-items})
              [:div#page-wrapper {}
-              #_(screen props)
-              (cond
-                (= current-screen :trends) (trends-view {:charts topic-items
-                                                         :trends trends})
-                (= current-screen :topic) (topic-view {:texts (current-topic topics)
-                                                       :name  (topic-name topic-items current-topic)}))]]))))
+              (screen props)]]))))

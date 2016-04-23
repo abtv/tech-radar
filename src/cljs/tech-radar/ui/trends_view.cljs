@@ -1,6 +1,7 @@
 (ns tech-radar.ui.trends-view
   (:require [om.next :as om :refer-macros [defui]]
-            [sablono.core :refer-macros [html]]))
+            [sablono.core :refer-macros [html]]
+            [tech-radar.ui.loading-view :refer [loading-view]]))
 
 (defn- limit [data]
   (->> data
@@ -56,17 +57,14 @@
 
 (def chart (om/factory Chart))
 
-(defui TrendsView
+(defui ChartsView
   Object
   (render [this]
-    (html
-      (let [{:keys [charts trends]} (om/props this)
-            width  600
-            height 400]
-        [:div.container-fluid
-         [:div.row
-          [:div.col-lg-12
-           [:h2 "Trends"]]]
+    (let [{:keys [charts trends]} (om/props this)
+          width  600
+          height 400]
+      (html
+        [:div
          (->> charts
               (partition-all 2)
               (map-indexed (fn [idx items]
@@ -74,12 +72,27 @@
                               (->> items
                                    (map (fn [{:keys [id name]}]
                                           [:div.col-lg-6
-                                           (when-let [data (id trends)]
+                                           (if-let [data (id trends)]
                                              (chart {:id     (cljs.core/name id)
                                                      :name   name
                                                      :data   data
                                                      :width  width
-                                                     :height height})
-                                             )])))])))]))))
+                                                     :height height}))])))])))]))))
+
+(def charts-view (om/factory ChartsView))
+
+(defui TrendsView
+  Object
+  (render [this]
+    (html
+      (let [{:keys [charts trends]} (om/props this)]
+        [:div.container-fluid
+         [:div.row
+          [:div.col-lg-12
+           [:h2 "Trends"]]]
+         (if (seq trends)
+           (charts-view {:charts charts
+                         :trends trends})
+           (loading-view {:text "Loading trends, please wait."}))]))))
 
 (def trends-view (om/factory TrendsView))

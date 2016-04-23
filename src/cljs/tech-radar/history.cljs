@@ -16,7 +16,8 @@
       (goog.events/listen EventType/NAVIGATE
                           (fn [e]
                             (let [token (.-token e)]
-                              (secretary/dispatch! token))))
+                              (secretary/dispatch! token)
+                              (js/window.scrollTo 0 0))))
       (.setEnabled true))))
 
 (defn navigate-to-url! [url-token]

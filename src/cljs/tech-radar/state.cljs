@@ -2,7 +2,6 @@
 
 (defonce app-state (atom {:current-screen :trends
                           :current-topic  nil
-                          :msg            "Hello Om.Next world!"
                           :topic-items    [{:id   :jobs
                                             :href "#/topic/jobs"
                                             :name "Jobs"}
