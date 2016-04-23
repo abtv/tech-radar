@@ -12,7 +12,14 @@
 (defn init-routes []
   (defroute charts-view "/" []
     (run-trends app-state)
-    (swap! app-state assoc-in [:current-screen] :trends))
+    (swap! app-state (fn [state]
+                         (-> state
+                             (assoc-in [:current-screen] :trends)
+                             (assoc :current-topic nil)))))
   (defroute table-view "/topic/:topic" [topic]
-    (show-topic app-state (keyword topic))
-    (swap! app-state assoc-in [:current-screen] (keyword topic))))
+    (let [topic* (keyword topic)]
+      (show-topic app-state (keyword topic*))
+      (swap! app-state (fn [state]
+                         (-> state
+                             (assoc-in [:current-screen] :topic)
+                             (assoc :current-topic topic*)))))))

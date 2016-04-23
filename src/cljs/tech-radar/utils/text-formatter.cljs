@@ -15,6 +15,6 @@
          (map-indexed (fn [idx chunk]
                         (let [child-key (str key "-" idx)]
                           (cond
-                            (.startsWith chunk "http://") (create-link chunk child-key)
-                            (.startsWith chunk "https://") (create-link chunk child-key)
+                            (s/starts-with? chunk "http://") (create-link chunk child-key)
+                            (s/starts-with? chunk "https://") (create-link chunk child-key)
                             :else [:span {:key child-key} (str chunk " ")])))))))
