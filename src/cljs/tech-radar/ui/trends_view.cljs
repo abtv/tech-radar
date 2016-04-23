@@ -74,10 +74,12 @@
                               (->> items
                                    (map (fn [{:keys [id name]}]
                                           [:div.col-lg-6
-                                           (chart {:id     (cljs.core/name id)
-                                                   :name   name
-                                                   :data   (id trends)
-                                                   :width  width
-                                                   :height height})])))])))]))))
+                                           (when-let [data (id trends)]
+                                             (chart {:id     (cljs.core/name id)
+                                                     :name   name
+                                                     :data   data
+                                                     :width  width
+                                                     :height height})
+                                             )])))])))]))))
 
 (def trends-view (om/factory TrendsView))

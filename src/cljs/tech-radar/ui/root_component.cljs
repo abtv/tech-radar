@@ -14,16 +14,16 @@
        (:name)))
 
 #_(defmulti screen (fn [props]
-                   :trends
-                   #_(:current-screen props)))
+                     :trends
+                     #_(:current-screen props)))
 
 #_(defmethod screen :trends
-  (fn [obj]
-    []
-    #_(html
-        [:div
-         (trends-view {:charts topic-items
-                       :trends trends})])))
+    (fn [obj]
+      []
+      #_(html
+          [:div
+           (trends-view {:charts topic-items
+                         :trends trends})])))
 ;
 ;(defmethod screen :topic (fn [{:keys [current-screen topics topic-items]}]
 ;                           (topic-view {:language current-screen
@@ -37,7 +37,7 @@
 (defui RootComponent
   Object
   (render [this]
-    (let [{:keys [current-screen topics trends topic-items] :as props} (om/props this)]
+    (let [{:keys [current-screen topics trends topic-items current-topic] :as props} (om/props this)]
       (html [:div#wrapper {}
              (nav-bar (select-keys props [:topic-items]))
              [:div#page-wrapper {}
@@ -45,6 +45,5 @@
               (cond
                 (= current-screen :trends) (trends-view {:charts topic-items
                                                          :trends trends})
-                (topics current-screen) (topic-view {:language current-screen
-                                                     :texts    (current-screen topics)
-                                                     :name     (topic-name topic-items current-screen)}))]]))))
+                (= current-screen :topic) (topic-view {:texts (current-topic topics)
+                                                       :name  (topic-name topic-items current-topic)}))]]))))

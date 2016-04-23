@@ -50,17 +50,19 @@
            [:h1 {:class "page-header"} name]]]
          [:div {:class "row"}
           [:div {:class "col-lg-12"}
-           [:div {:class "table-responsive"}
-            [:table {:class "table table-bordered table-hover table-striped"}
-             [:thead {}
-              [:tr {}
-               [:th {} "Time"]
-               [:th {} "Text"]
-               [:th {} "Status"]]]
-             [:tbody
-              (->> texts
-                   (take 25)
-                   (mapv topic-item))]]]]]]))))
+           (if (seq texts)
+             [:div {:class "table-responsive"}
+              [:table {:class "table table-bordered table-hover table-striped"}
+               [:thead {}
+                [:tr {}
+                 [:th {} "Time"]
+                 [:th {} "Text"]
+                 [:th {} "Status"]]]
+               [:tbody
+                (->> texts
+                     (take 25)
+                     (mapv topic-item))]]])
+           ]]]))))
 
 (def topic-view (om/factory TopicView))
 
