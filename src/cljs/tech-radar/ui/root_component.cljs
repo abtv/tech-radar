@@ -6,24 +6,19 @@
             [tech-radar.ui.topic-view :refer [topic-view]]
             [tech-radar.ui.trends-view :refer [trends-view]]))
 
-(defn- topic-name [topic-items current-screen]
-  (->> topic-items
-       (current-screen)
-       (:name)))
-
 (defmulti screen (fn [props]
                    (:current-screen props)))
 
-(defmethod screen :trends [{:keys [topic-items trends]}]
-  (trends-view {:charts topic-items
-                :trends trends}))
+(defmethod screen :trends [props]
+  (trends-view props))
 
-(defmethod screen :topic [{:keys [current-topic topics topic-items records-per-page]}]
-  (topic-view {:texts            (current-topic topics)
-               :name             (topic-name topic-items current-topic)
-               :records-per-page records-per-page}))
+(defmethod screen :topic [props]
+  (topic-view props))
 
 (defui RootComponent
+  static om/IQuery
+  (query [this]
+    [:current-screen :records-per-page :topic-items :trends :current-topic :topics])
   Object
   (render [this]
     (let [props (om/props this)]

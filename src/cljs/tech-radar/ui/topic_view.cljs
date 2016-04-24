@@ -40,6 +40,9 @@
 (def topic-item (om/factory TopicItem {:keyfn :id}))
 
 (defui TableView
+  static om/IQuery
+  (query [this]
+    [:records-per-page :texts])
   Object
   (render [this]
     (let [{:keys [texts records-per-page]} (om/props this)]
@@ -57,10 +60,20 @@
 
 (def table-view (om/factory TableView))
 
+(defn- topic-name [topic-items current-topic]
+  (->> topic-items
+       (current-topic)
+       (:name)))
+
 (defui TopicView
+  static om/IQuery
+  (query [this]
+    [:name :texts :records-per-page])
   Object
   (render [this]
-    (let [{:keys [name texts records-per-page]} (om/props this)]
+    (let [{:keys [current-topic topics topic-items records-per-page]} (om/props this)
+          name  (topic-name topic-items current-topic)
+          texts (current-topic topics)]
       (html
         [:div.container-fluid {}
          [:div {:class "row"}

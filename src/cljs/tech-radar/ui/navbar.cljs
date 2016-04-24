@@ -19,6 +19,9 @@
        [:img {:src "images/radar.svg"}]])))
 
 (defui NavbarRight
+  static om/IQuery
+  (query [this]
+    [:records-per-page])
   Object
   (render [this]
     (let [{:keys [records-per-page]} (om/props this)]
@@ -35,11 +38,15 @@
                                   nil)
                          :key   (str "records_count_" records-count)}
                     [:a {:on-click (fn [e]
-                                     (js/console.log "click"))} records-count]]) [10 25 50])]]]))))
+                                     #_(om/transact! this `[(records-per-page/set ~{:records-per-page records-count})]))}
+                     records-count]]) [10 20 30])]]]))))
 
 (def navbar-right (om/factory NavbarRight))
 
 (defui MenuItem
+  static om/IQuery
+  (query [this]
+    [:href :name])
   Object
   (render [this]
     (let [{:keys [href name]} (om/props this)]
@@ -52,6 +59,9 @@
 (def menu-item (om/factory MenuItem {:keyfn :name}))
 
 (defui SidebarMenuItems
+  static om/IQuery
+  (query [this]
+    [:topic-items])
   Object
   (render [this]
     (let [{:keys [topic-items]} (om/props this)]
@@ -64,6 +74,9 @@
 (def sidebar-menu-items (om/factory SidebarMenuItems))
 
 (defui NavBar
+  static om/IQuery
+  (query [this]
+    [:records-per-page :topic-items])
   Object
   (render [this]
     (let [props (om/props this)]

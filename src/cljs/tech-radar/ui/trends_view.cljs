@@ -59,11 +59,11 @@
       (when data
         (draw-chart data params))))
   #_(componentWillMount [this]
-    (.addEventListener js/window
-                       "resize" (fn []
-                                  (let [{:keys [width height]} (get-div-dimensions "charts-view")]
-                                    (js/console.log width)
-                                    #_(om/update cursor :div {:width width :height height})))))
+                        (.addEventListener js/window
+                                           "resize" (fn []
+                                                      (let [{:keys [width height]} (get-div-dimensions "charts-view")]
+                                                        (js/console.log width)
+                                                        #_(om/update cursor :div {:width width :height height})))))
   (render [this]
     (let [props (om/props this)]
       (html
@@ -96,16 +96,19 @@
 (def charts-view (om/factory ChartsView))
 
 (defui TrendsView
+  static om/IQuery
+  (query [this]
+    [:topic-items :trends :current-topic])
   Object
   (render [this]
     (html
-      (let [{:keys [charts trends]} (om/props this)]
+      (let [{:keys [topic-items trends]} (om/props this)]
         [:div.container-fluid
          [:div.row
           [:div.col-lg-12
            [:h3 {:class "page-header"} "Trends"]]]
          (if (seq trends)
-           (charts-view {:charts charts
+           (charts-view {:charts topic-items
                          :trends trends})
            (loading-view {:text "Loading trends, please wait."}))]))))
 
