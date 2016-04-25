@@ -26,11 +26,17 @@
                 (let [tweet-info (select-keys tweet [:id :text :created-at :hashtags])]
                   (reduce (add-topic-fn tweet-info hashtags) data topics))) tweet))
 
-(defn- trends* [data]
-  (->> @data
-       (map (fn [[topic {hashtags :hashtags}]]
-              [topic hashtags]))
-       (into {})))
+(defn- get-top-hashtags [max-count trends]
+  (->> trends
+       (sort-by (comp - second))
+       (take max-count)))
+
+(defn- trends* [data settings]
+  (let [{:keys [max-hashtags-per-trend]} settings]
+    (->> @data
+         (map (fn [[topic {hashtags :hashtags}]]
+                [topic (get-top-hashtags max-hashtags-per-trend hashtags)]))
+         (into {}))))
 
 (defn- texts* [data topic settings]
   (let [texts (or (get-in @data [(keyword topic) :texts])
@@ -50,7 +56,7 @@
     nil)
   Analyze
   (trends [this]
-    (trends* (:data this)))
+    (trends* (:data this) settings))
   (topic [this topic]
     (let [{:keys [data settings]} this]
       (texts* data topic settings))))

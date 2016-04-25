@@ -20,16 +20,20 @@
       (do
         (timbre/info "Initializing analysis")
         (let [{:keys [topics]} (load-classify-settings)
-              max-texts-per-request (-> env
-                                        (:max-texts-per-request)
-                                        (parse-int))
-              load-data-hours       (-> env
-                                        (:load-data-hours)
-                                        (parse-int))
-              model                 (new-model {:max-texts-per-request max-texts-per-request})
-              database              (:database database)
-              topics                (map first topics)
-              initial-data          (load-data database topics load-data-hours)]
+              max-hashtags-per-trend (-> env
+                                         (:max-hashtags-per-trend)
+                                         (parse-int))
+              max-texts-per-request  (-> env
+                                         (:max-texts-per-request)
+                                         (parse-int))
+              load-data-hours        (-> env
+                                         (:load-data-hours)
+                                         (parse-int))
+              model                  (new-model {:max-hashtags-per-trend max-hashtags-per-trend
+                                                 :max-texts-per-request  max-texts-per-request})
+              database               (:database database)
+              topics                 (map first topics)
+              initial-data           (load-data database topics load-data-hours)]
           (init model initial-data)
           (run {:model         model
                 :analysis-chan (:analysis-chan preprocessor)

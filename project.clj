@@ -65,25 +65,27 @@
                                  :compiler     {:optimizations :advanced
                                                 :output-to     "frontend-release/main.js"}}}}
 
-  :profiles {:dev     {:env {:host                  "localhost"
-                             :port                  "3000"
-                             :database              "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
-                             :twitter-security      "twitter-security.edn"
-                             :twitter-settings      "twitter-settings.edn"
-                             :classify-settings     "classify-settings.edn"
-                             :max-texts-per-request "200"
-                             :load-data-hours       "4"
-                             :metrics-timeout-s     "10"}}
+  :profiles {:dev     {:env {:host                   "localhost"
+                             :port                   "3000"
+                             :database               "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
+                             :twitter-security       "twitter-security.edn"
+                             :twitter-settings       "twitter-settings.edn"
+                             :classify-settings      "classify-settings.edn"
+                             :max-hashtags-per-trend "25"
+                             :max-texts-per-request  "200"
+                             :load-data-hours        "4"
+                             :metrics-timeout-s      "10"}}
              :uberjar {:main        tech-radar.core
                        :aot         [tech-radar.core]
                        :global-vars {;*warn-on-reflection* true
                                      *assert* false}
-                       :env         {:host                  "0.0.0.0"
-                                     :port                  "3000"
-                                     :database              "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
-                                     :twitter-security      "twitter-security.edn"
-                                     :twitter-settings      "twitter-settings.edn"
-                                     :classify-settings     "classify-settings.edn"
-                                     :max-texts-per-request "200"
-                                     :load-data-hours       "4"
-                                     :metrics-timeout-s     "60"}}})
+                       :env         {:host                   "0.0.0.0"
+                                     :port                   "3000"
+                                     :database               "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
+                                     :twitter-security       "twitter-security.edn"
+                                     :twitter-settings       "twitter-settings.edn"
+                                     :classify-settings      "classify-settings.edn"
+                                     :max-hashtags-per-trend "25"
+                                     :max-texts-per-request  "200"
+                                     :load-data-hours        "4"
+                                     :metrics-timeout-s      "60"}}})
