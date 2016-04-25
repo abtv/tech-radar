@@ -29,7 +29,8 @@
 (defn- get-top-hashtags [max-count trends]
   (->> trends
        (sort-by (comp - second))
-       (take max-count)))
+       (take max-count)
+       (into {})))
 
 (defn- trends* [data settings]
   (let [{:keys [max-hashtags-per-trend]} settings]
@@ -56,15 +57,18 @@
     nil)
   Analyze
   (trends [this]
-    (trends* (:data this) settings))
+    (let [{:keys [data settings]} this]
+      (trends* data settings)))
   (topic [this topic]
     (let [{:keys [data settings]} this]
       (texts* data topic settings))))
 
 (defn new-model [settings]
-  (let [{:keys [max-texts-per-request]} settings]
+  (let [{:keys [max-hashtags-per-trend max-texts-per-request]} settings]
     (when-not max-texts-per-request
       (throw (Exception. "you have to provide max-texts-per-request param")))
+    (when-not max-hashtags-per-trend
+      (throw (Exception. "you have to provide max-hashtags-per-trend param")))
 
     (map->Model {:data     (atom {})
                  :settings settings})))
