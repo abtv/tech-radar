@@ -2,8 +2,10 @@
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :refer-macros [html]]
             [om.next :as om]
-            [tech-radar.ui.navbar :refer [nav-bar]]
-            [tech-radar.ui.topic-view :refer [topic-view]]
+            [tech-radar.ui.navbar :refer [nav-bar
+                                          NavBar]]
+            [tech-radar.ui.topic-view :refer [topic-view
+                                              TopicView]]
             [tech-radar.ui.trends-view :refer [trends-view]]))
 
 (defmulti screen (fn [props]
@@ -18,11 +20,15 @@
 (defui RootComponent
   static om/IQuery
   (query [this]
-    [:current-screen :records-per-page :topic-items :trends :current-topic :topics])
+    `[{:settings ~(reduce conj (om/get-query NavBar) (om/get-query TopicView))}
+      :trends
+      :topics
+      :current-screen
+      :current-topic])
   Object
   (render [this]
-    (let [props (om/props this)]
+    (let [{:keys [settings] :as props} (om/props this)]
       (html [:div#wrapper {}
-             (nav-bar props)
+             (nav-bar settings)
              [:div#page-wrapper {}
               (screen props)]]))))

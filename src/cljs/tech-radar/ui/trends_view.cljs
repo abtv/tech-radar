@@ -72,14 +72,18 @@
 (def chart (om/factory Chart))
 
 (defui ChartsView
+  static om/IQuery
+  (query [this]
+    [{:settings [:topic-items]} :trends :current-topic])
   Object
   (render [this]
-    (let [{:keys [charts trends]} (om/props this)
+    (let [{{topic-items :topic-items} :settings
+           trends                     :trends} (om/props this)
           width  400
           height 400]
       (html
         [:div {:id "charts-view"}
-         (->> charts
+         (->> topic-items
               (partition-all 2)
               (map-indexed (fn [idx items]
                              [:div.row {:key (str "radar_" idx)}
@@ -98,18 +102,17 @@
 (defui TrendsView
   static om/IQuery
   (query [this]
-    [:topic-items :trends :current-topic])
+    (om/get-query ChartsView))
   Object
   (render [this]
     (html
-      (let [{:keys [topic-items trends]} (om/props this)]
+      (let [{:keys [trends] :as props} (om/props this)]
         [:div.container-fluid
          [:div.row
           [:div.col-lg-12
            [:h3 {:class "page-header"} "Trends"]]]
          (if (seq trends)
-           (charts-view {:charts topic-items
-                         :trends trends})
+           (charts-view props)
            (loading-view {:text "Loading trends, please wait."}))]))))
 
 (def trends-view (om/factory TrendsView))

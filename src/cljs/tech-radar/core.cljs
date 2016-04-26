@@ -9,7 +9,9 @@
 (init-routes)
 (init-history)
 
-(om/add-root! (om/reconciler {:state  app-state
-                              :parser parser})
+(def reconciler (om/reconciler {:state  app-state
+                                :parser parser}))
+
+(om/add-root! reconciler
               RootComponent
               (.getElementById js/document "app"))

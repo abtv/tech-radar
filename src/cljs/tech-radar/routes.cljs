@@ -15,11 +15,13 @@
     (swap! app-state (fn [state]
                          (-> state
                              (assoc-in [:current-screen] :trends)
-                             (assoc :current-topic nil)))))
+                             (assoc :current-topic nil)
+                             (assoc-in [:settings :page-number] 1)))))
   (defroute table-view "/topic/:topic" [topic]
     (let [topic* (keyword topic)]
       (show-topic app-state (keyword topic*))
       (swap! app-state (fn [state]
                          (-> state
                              (assoc-in [:current-screen] :topic)
-                             (assoc :current-topic topic*)))))))
+                             (assoc :current-topic topic*)
+                             (assoc-in [:settings :page-number] 1)))))))

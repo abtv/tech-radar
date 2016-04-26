@@ -28,7 +28,7 @@
                  [environ "1.0.2"]
                  [com.taoensso/timbre "4.3.1"]
                  [camel-snake-kebab "0.3.2"]
-                 [org.omcljs/om "1.0.0-alpha31"]
+                 [org.omcljs/om "1.0.0-alpha34"]
                  [sablono "0.6.2"]
                  [cljs-ajax "0.5.4"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
