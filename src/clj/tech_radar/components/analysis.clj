@@ -31,13 +31,16 @@
                                          (parse-int))
               model                  (new-model {:max-hashtags-per-trend max-hashtags-per-trend
                                                  :max-texts-per-request  max-texts-per-request})
-              database               (:database database)
-              topics                 (map first topics)
-              initial-data           (load-data database topics load-data-hours)]
+              database*              (:database database)
+              topics*                (map first topics)
+              initial-data           (load-data database* topics* load-data-hours)]
           (init model initial-data)
-          (run {:model         model
-                :analysis-chan (:analysis-chan preprocessor)
-                :metrics       metrics})
+          (run {:database        database*
+                :topics          topics*
+                :load-data-hours load-data-hours
+                :model           model
+                :analysis-chan   (:analysis-chan preprocessor)
+                :metrics         metrics})
           (assoc component :get-trends-fn (fn []
                                             (trends model))
                            :get-texts-fn (fn [topic*]

@@ -2,6 +2,7 @@
 
 echo 'building backend...'
 export LEIN_SNAPSHOTS_IN_RELEASE=1
+rm -rf backend-release/
 lein do clean, uberjar
 mkdir backend-release/
 cp .lein-env backend-release/
