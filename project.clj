@@ -38,7 +38,6 @@
                  [cljsjs/dimple "2.1.2-0"]
                  [com.cognitect/transit-clj "0.8.285"]]
 
-
   :source-paths ["src/cljc" "src/clj" "src/cljs"]
 
   :plugins [[lein-environ "1.0.2"]
@@ -65,16 +64,21 @@
                                  :compiler     {:optimizations :advanced
                                                 :output-to     "frontend-release/main.js"}}}}
 
-  :profiles {:dev     {:env {:host                   "localhost"
-                             :port                   "3000"
-                             :database               "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
-                             :twitter-security       "twitter-security.edn"
-                             :twitter-settings       "twitter-settings.edn"
-                             :classify-settings      "classify-settings.edn"
-                             :max-hashtags-per-trend "25"
-                             :max-texts-per-request  "200"
-                             :load-data-hours        "4"
-                             :metrics-timeout-s      "10"}}
+  :profiles {:dev     {:global-vars {*warn-on-reflection* true
+                                     *assert*             false}
+                       :env         {:host                   "localhost"
+                                     :port                   "3000"
+                                     :database               "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
+                                     :twitter-security       "twitter-security.edn"
+                                     :twitter-settings       "twitter-settings.edn"
+                                     :classify-settings      "classify-settings.edn"
+                                     :max-hashtags-per-trend "25"
+                                     :max-texts-per-request  "200"
+                                     :load-data-hours        "4"
+                                     :metrics-timeout-s      "30"
+                                     :log-path               "./logs/tech-radar.log"
+                                     :max-log-size-mb        "1"
+                                     :backlog                "2"}}
              :uberjar {:main        tech-radar.core
                        :aot         [tech-radar.core]
                        :global-vars {;*warn-on-reflection* true
@@ -88,4 +92,7 @@
                                      :max-hashtags-per-trend "25"
                                      :max-texts-per-request  "200"
                                      :load-data-hours        "4"
-                                     :metrics-timeout-s      "60"}}})
+                                     :metrics-timeout-s      "300"
+                                     :log-path               "./logs/tech-radar.log"
+                                     :max-log-size-mb        "1"
+                                     :backlog                "10"}}})
