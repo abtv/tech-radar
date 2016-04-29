@@ -35,8 +35,7 @@
         [:tr {}
          [:td {} (time->str created-at)]
          [:td {} (text-item {:id   id
-                             :text text})]
-         [:td {} ""]]))))
+                             :text text})]]))))
 
 (def topic-item (om/factory TopicItem {:keyfn :id}))
 
@@ -50,8 +49,7 @@
           [:thead {}
            [:tr {}
             [:th {} "Time"]
-            [:th {} "Text"]
-            [:th {} "Status"]]]
+            [:th {} "Text"]]]
           [:tbody
            (->> texts
                 (take records-per-page)
@@ -67,7 +65,7 @@
         [:div.container-fluid {}
          [:div {:class "row"}
           [:div {:class "col-lg-12"}
-           [:h1 {:class "page-header"} name]]]
+           [:h3 {:class "page-header"} name]]]
          [:div {:class "row"}
           [:div {:class "col-lg-12"}
            (if (seq texts)

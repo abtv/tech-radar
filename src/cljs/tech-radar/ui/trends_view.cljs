@@ -103,7 +103,7 @@
         [:div.container-fluid
          [:div.row
           [:div.col-lg-12
-           [:h2 "Trends"]]]
+           [:h3 {:class "page-header"} "Trends"]]]
          (if (seq trends)
            (charts-view {:charts charts
                          :trends trends})

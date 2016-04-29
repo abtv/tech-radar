@@ -1,18 +1,22 @@
 /*!
  * Start Bootstrap - SB Admin Bootstrap Admin Template (http://startbootstrap.com)
- * Code licensed under the Apach/e License v2.0.
+ * Code licensed under the Apache License v2.0.
  * For details, see http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 /* Global Styles */
 
-body {
+#app {
     margin-top: 100px;
     background-color: #222;
 }
 
+.navbar-header {
+    height: 50px;
+}
+
 @media(min-width:768px) {
-    body {
+    #app {
         margin-top: 50px;
     }
 }
@@ -34,12 +38,12 @@ body {
 
 @media(min-width:768px) {
     #wrapper {
-        padding-left: 101px;
+        padding-left: 171px;
     }
 
-    /*#page-wrapper {
+    #page-wrapper {
         padding: 10px;
-    }*/
+    }
 }
 
 /* Top Navigation */
@@ -116,9 +120,9 @@ ul.alert-dropdown {
     .side-nav {
         position: fixed;
         top: 51px;
-        left: 101px;
-        width: 101px;
-        margin-left: -101px;
+        left: 171px;
+        width: 171px;
+        margin-left: -171px;
         border: none;
         border-radius: 0;
         overflow-y: auto;
@@ -129,7 +133,7 @@ ul.alert-dropdown {
     }
 
     .side-nav>li>a {
-        width: 101px;
+        width: 171px;
     }
 
     .side-nav li a:hover,
