@@ -6,29 +6,33 @@
                                           NavBar]]
             [tech-radar.ui.topic-view :refer [topic-view
                                               TopicView]]
-            [tech-radar.ui.trends-view :refer [trends-view]]))
+            [tech-radar.ui.trends-view :refer [trends-view
+                                               TrendsView]]))
 
-(defmulti screen (fn [props]
+(defmulti screen (fn [this props]
                    (:current-screen props)))
 
-(defmethod screen :trends [props]
+(defmethod screen :trends [this props]
   (trends-view props))
 
-(defmethod screen :topic [props]
-  (topic-view props))
+(defmethod screen :topic [this props]
+  (topic-view (om/computed props {:set-page-number (fn [page-number]
+                                                     #(om/transact! this `[(page-number/set {:page-number ~page-number})
+                                                                          [:settings]]))})))
 
 (defui RootComponent
   static om/IQuery
   (query [this]
-    `[{:settings ~(reduce conj (om/get-query NavBar) (om/get-query TopicView))}
+    `[{:navbar-settings ~(om/get-query NavBar)}
+      {:settings [:topic-items]}
       :trends
       :topics
       :current-screen
       :current-topic])
   Object
   (render [this]
-    (let [{:keys [settings] :as props} (om/props this)]
+    (let [{:keys [navbar-settings] :as props} (om/props this)]
       (html [:div#wrapper {}
-             (nav-bar settings)
+             (nav-bar navbar-settings)
              [:div#page-wrapper {}
-              (screen props)]]))))
+              (screen this props)]]))))

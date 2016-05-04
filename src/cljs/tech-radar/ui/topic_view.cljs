@@ -63,16 +63,15 @@
        (current-topic)
        (:name)))
 
-(defn- page-fn [component current-page-number]
+(defn- page-fn [set-page-number current-page-number]
   (fn [page-number]
     [:li {:key   (str "page-" page-number)
           :class (when (= page-number current-page-number)
                    "active")}
-     [:a {:on-click #(om/transact! component `[(page-number/set {:page-number ~page-number})
-                                               [:settings]])}
+     [:a {:on-click (set-page-number page-number)}
       page-number]]))
 
-(defn- pagintation [{:keys [component texts records-per-page page-number]}]
+(defn- pagintation [{:keys [texts records-per-page page-number set-page-number]}]
   (when (seq texts)
     (let [texts-count (count texts)
           pages-count (/ texts-count records-per-page)
@@ -83,7 +82,7 @@
        [:nav {}
         [:ul.pagination {}
          (->> (range 1 pages-count)
-              (mapv (page-fn component page-number)))]]])))
+              (mapv (page-fn set-page-number page-number)))]]])))
 
 (defui TopicView
   static om/IQuery
@@ -101,7 +100,8 @@
             records-per-page :records-per-page
             page-number      :page-number} :settings} (om/props this)
           name  (topic-name topic-items current-topic)
-          texts (current-topic topics)]
+          texts (current-topic topics)
+          {:keys [set-page-number]} (om/get-computed this)]
       (html
         [:div.container-fluid {}
          [:div {:class "row"}
@@ -109,18 +109,19 @@
            [:h3 {:class "page-header"} name]]]
          [:div {:class "row"}
           [:div {:class "col-lg-12"}
-           (pagintation {:component        this
-                         :texts            texts
+           (pagintation {:texts            texts
                          :records-per-page records-per-page
-                         :page-number      page-number})
+                         :page-number      page-number
+                         :set-page-number  set-page-number})
            (if (seq texts)
              (table-view (om/computed {} {:texts            texts
-                                          :records-per-page records-per-page}))
+                                          :records-per-page records-per-page
+                                          :page-number      page-number}))
              (loading-view {:text "Loading texts, please wait."}))
-           (pagintation {:component        this
-                         :texts            texts
+           (pagintation {:texts            texts
                          :records-per-page records-per-page
-                         :page-number      page-number})]]]))))
+                         :page-number      page-number
+                         :set-page-number  set-page-number})]]]))))
 
 (def topic-view (om/factory TopicView))
 
