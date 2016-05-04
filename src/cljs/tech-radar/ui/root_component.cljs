@@ -18,7 +18,7 @@
 (defmethod screen :topic [this props]
   (topic-view (om/computed props {:set-page-number (fn [page-number]
                                                      #(om/transact! this `[(page-number/set {:page-number ~page-number})
-                                                                          [:settings]]))})))
+                                                                           [:settings]]))})))
 
 (defui RootComponent
   static om/IQuery
@@ -31,8 +31,10 @@
       :current-topic])
   Object
   (render [this]
-    (let [{:keys [navbar-settings] :as props} (om/props this)]
+    (let [{:keys [navbar-settings
+                  current-topic] :as props} (om/props this)]
       (html [:div#wrapper {}
-             (nav-bar navbar-settings)
+             (nav-bar (om/computed navbar-settings
+                                   {:current-topic current-topic}))
              [:div#page-wrapper {}
               (screen this props)]]))))

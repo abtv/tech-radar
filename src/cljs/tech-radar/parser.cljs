@@ -19,10 +19,6 @@
 
 (defmulti mutate om/dispatch)
 
-#_(defmethod mutate 'records-per-page/set [{:keys [state] :as env} key params]
-    (let [{:keys [records-per-page]} params]
-      {:action (swap! state assoc-in [:settings :records-per-page] records-per-page)}))
-
 (defmethod mutate 'records-per-page/set [{:keys [state] :as env} key params]
   (let [{:keys [records-per-page]} params]
     {:action (swap! state (fn [st]

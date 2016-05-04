@@ -30,27 +30,30 @@
                    :key   (str "records_count_" records-count)}
               [:a {:on-click #(om/transact! component `[(records-per-page/set {:records-per-page ~records-count})
                                                         {:settings [:records-per-page]}])}
-               records-count]]) [10 20 30])]]])
+               records-count]]) [15 20 25 30])]]])
 
-(defui MenuItem
-  static om/IQuery
-  (query [this]
-    [:href :name])
-  Object
-  (render [this]
-    (let [{:keys [href name]} (om/props this)]
-      (html
-        [:li {}
-         [:a {:href href
-              :alt  name}
-          [:span {} name]]]))))
+(defn menu-item [{:keys [href name selected]}]
+  [:li {:key   (str "menu-item-" name)
+        :class (when selected
+                 "active")}
+   [:a {:href href
+        :alt  name}
+    [:span {} name]]])
 
-(def menu-item (om/factory MenuItem {:keyfn :name}))
-
-(defn sidebar-menu-items [topic-items]
+(defn sidebar-menu-items [topic-items current-topic]
   [:div.collapse.navbar-collapse.navbar-ex1-collapse {}
    [:ul.nav.navbar-nav.side-nav {}
-    (mapv (comp menu-item second) topic-items)]])
+    (mapv (fn [[id params]]
+            (menu-item (assoc params :selected (= id current-topic)))) topic-items)]])
+
+(defn search-input []
+  [:form.navbar-form.navbar-right {}
+   [:div.input-group {}
+    [:input.form-control {:type        "text"
+                          :placeholder "Search..."}]
+    [:span.input-group-btn {}
+     [:button.btn.btn-default {}
+      [:i.fa.fa-search {} ""]]]]])
 
 (defui NavBar
   static om/IQuery
@@ -58,10 +61,12 @@
     [:records-per-page :topic-items :page-number])
   Object
   (render [this]
-    (let [{:keys [records-per-page topic-items]} (om/props this)]
+    (let [{:keys [records-per-page topic-items]} (om/props this)
+          {:keys [current-topic]} (om/get-computed this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
+             #_(search-input)
              (navbar-right this records-per-page)
-             (sidebar-menu-items topic-items)]))))
+             (sidebar-menu-items topic-items current-topic)]))))
 
 (def nav-bar (om/factory NavBar))

@@ -66,8 +66,9 @@
 (defn- page-fn [set-page-number current-page-number]
   (fn [page-number]
     [:li {:key   (str "page-" page-number)
-          :class (when (= page-number current-page-number)
-                   "active")}
+          :class (if (= page-number current-page-number)
+                   "active cursor"
+                   "cursor")}
      [:a {:on-click (set-page-number page-number)}
       page-number]]))
 
@@ -79,8 +80,8 @@
                         pages-count
                         (inc pages-count))]
       [:div.text-center {}
-       [:nav {}
-        [:ul.pagination {}
+       [:div {}
+        [:ul.pagination.no-borders {}
          (->> (range 1 pages-count)
               (mapv (page-fn set-page-number page-number)))]]])))
 
@@ -106,9 +107,6 @@
         [:div.container-fluid {}
          [:div {:class "row"}
           [:div {:class "col-lg-12"}
-           [:h3 {:class "page-header"} name]]]
-         [:div {:class "row"}
-          [:div {:class "col-lg-12"}
            (pagintation {:texts            texts
                          :records-per-page records-per-page
                          :page-number      page-number
@@ -117,11 +115,7 @@
              (table-view (om/computed {} {:texts            texts
                                           :records-per-page records-per-page
                                           :page-number      page-number}))
-             (loading-view {:text "Loading texts, please wait."}))
-           (pagintation {:texts            texts
-                         :records-per-page records-per-page
-                         :page-number      page-number
-                         :set-page-number  set-page-number})]]]))))
+             (loading-view {:text "Loading texts, please wait."}))]]]))))
 
 (def topic-view (om/factory TopicView))
 

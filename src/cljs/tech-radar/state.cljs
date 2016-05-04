@@ -14,7 +14,7 @@
                                                                        :name "Linux"}
                                                           :nosql      {:href "#/topic/nosql"
                                                                        :name "NoSQL"}}
-                                       :records-per-page 10
+                                       :records-per-page 15
                                        :page-number      1}
                       :current-screen :trends
                       :current-topic  nil
