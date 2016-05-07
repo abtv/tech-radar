@@ -1,22 +1,25 @@
 (ns tech-radar.parser
   (:require [om.next :as om]))
 
-(defmulti read om/dispatch)
+;;; --------------------------------------------------------------------------
+;;; Read functions
+(defmulti read-fn om/dispatch)
 
-(defmethod read :default [{:keys [state] :as env} key params]
-  (let [st @state]
-    (if-let [[_ v] (find st key)]
-      {:value v}
-      {:value :not-found})))
+(defmethod read-fn :default
+  [{:keys [parser ast query state] :as env} k _]
+  (let [[_ v] (find @state k)
+        value (condp = (:type ast)
+                :join (parser (assoc env :state (atom v)) query)
+                :prop v
+                :not-found)]
+    {:value value}))
 
-(defmethod read :navbar-settings [{:keys [state]} key params]
-  (let [st @state]
-    {:value (:settings st)}))
+;; TODO: refactor & remove
+(defmethod read-fn :state [{:keys [state]} _ _]
+  {:value @state})
 
-(defmethod read :topicview-settings [{:keys [state]} key params]
-  (let [st @state]
-    {:value (:settings st)}))
-
+;;; --------------------------------------------------------------------------
+;;; Mutations
 (defmulti mutate om/dispatch)
 
 (defmethod mutate 'records-per-page/set [{:keys [state] :as env} key params]
@@ -34,5 +37,5 @@
   (js/console.log "mutate not found")
   {:value :not-found})
 
-(def parser (om/parser {:read   read
+(def parser (om/parser {:read   read-fn
                         :mutate mutate}))

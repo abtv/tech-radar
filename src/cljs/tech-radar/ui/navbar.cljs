@@ -1,7 +1,6 @@
 (ns tech-radar.ui.navbar
   (:require [om.next :as om :refer-macros [defui]]
-            [sablono.core :refer-macros [html]]
-            [tech-radar.state :refer [app-state]]))
+            [sablono.core :refer-macros [html]]))
 
 (defn brand-toggle []
   (html
@@ -16,7 +15,7 @@
      [:a.navbar-brand {:href "#/"} "Tech Radar"]
      [:img {:src "images/radar.svg"}]]))
 
-(defn navbar-right [component records-per-page]
+(defn navbar-right [records-per-page set-record-count]
   [:ul {:class "nav navbar-right top-nav"}
    [:li {:class "dropdown"}
     [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown", :aria-expanded "false"}
@@ -28,8 +27,7 @@
                             "active"
                             nil)
                    :key   (str "records_count_" records-count)}
-              [:a {:on-click #(om/transact! component `[(records-per-page/set {:records-per-page ~records-count})
-                                                        {:settings [:records-per-page]}])}
+              [:a {:on-click set-record-count}
                records-count]]) [15 20 25 30])]]])
 
 (defn menu-item [{:keys [href name selected]}]
@@ -58,15 +56,21 @@
 (defui NavBar
   static om/IQuery
   (query [this]
-    [:records-per-page :topic-items :page-number])
+    [:records-per-page
+     :topic-items
+     :page-number
+     :current-topic])
   Object
+  (set-record-count [this cnt]
+    (om/transact! this `[(records-per-page/set {:records-per-page ~cnt})
+                         {:settings [:records-per-page]}]))
+
   (render [this]
-    (let [{:keys [records-per-page topic-items]} (om/props this)
-          {:keys [current-topic]} (om/get-computed this)]
+    (let [{:keys [records-per-page topic-items current-topic]} (om/props this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
              #_(search-input)
-             (navbar-right this records-per-page)
+             (navbar-right records-per-page #(.set-record-count this records-per-page))
              (sidebar-menu-items topic-items current-topic)]))))
 
 (def nav-bar (om/factory NavBar))
