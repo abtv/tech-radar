@@ -47,7 +47,7 @@
 (defn- texts-query [{:keys [topic from to]}]
   (let [limit  max-texts-to-load
         topic* (name topic)]
-    (-> {:select   [:tweets.id :tweets.text :tweets.created-at]
+    (-> {:select   [:tweets.id :tweets.twitter-id :tweets.text :tweets.created-at]
          :from     [:tweets]
          :join     [:topics [:= :tweets.id :topics.tweet-id]]
          :where    [:and

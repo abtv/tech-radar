@@ -23,7 +23,7 @@
 
 (defn- add* [data tweet]
   (swap! data (fn [data {:keys [topics hashtags] :as tweet}]
-                (let [tweet-info (select-keys tweet [:id :text :created-at :hashtags])]
+                (let [tweet-info (select-keys tweet [:id :twitter-id :text :created-at :hashtags])]
                   (reduce (add-topic-fn tweet-info hashtags) data topics))) tweet))
 
 (defn- get-top-hashtags [max-count trends]
@@ -44,7 +44,7 @@
                   [])
         {:keys [max-texts-per-request]} settings]
     (->> (last-texts texts max-texts-per-request)
-         (map #(select-keys % [:id :text :created-at])))))
+         (map #(select-keys % [:id :twitter-id :text :created-at])))))
 
 (defrecord Model [data settings]
   Storage
