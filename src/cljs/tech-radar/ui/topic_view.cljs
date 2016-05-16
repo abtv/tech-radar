@@ -30,10 +30,13 @@
 (defui TopicItem
   Object
   (render [this]
-    (let [{:keys [id created-at text]} (om/props this)]
+    (let [{:keys [id twitter-id created-at text]} (om/props this)]
+
       (html
         [:tr {}
-         [:td {} (time->str created-at)]
+         [:td {} [:a {:href   (str "https://twitter.com/statuses/" twitter-id)
+                      :target "_blank"}
+                  (time->str created-at)]]
          [:td {} (text-item {:id   id
                              :text text})]]))))
 
