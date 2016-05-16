@@ -226,3 +226,32 @@ ul.alert-dropdown {
     margin: 4px;
     padding: 0px;
 }
+
+.pagination>li>a {
+    color: #bbb;
+    background-color: #333;
+    border-color: white;
+    cursor: pointer;
+}
+
+.pagination>li>a:hover {
+    color: white;
+    background-color: #888;
+    border-color: white;
+    cursor: pointer;
+}
+
+.pagination>.active>a {
+    color: white;
+    background-color: black;
+    border-color: black;
+    cursor: default;
+}
+
+.pagination>.active>a:hover {
+    color: white;
+    background-color: #888;
+    border-color: white;
+    cursor: default;
+}
+
