@@ -4,8 +4,8 @@
             [ajax.core :as clj-ajax]
             [tech-radar.state :refer [app-state]]))
 
-(def base-url "http://localhost:3000/")
-;(def base-url "http://178.62.237.72:3000/")
+;(def base-url "http://localhost:3000/")
+(def base-url "http://178.62.237.72:3000/")
 
 (defn ajax-request [method url & {:as params}]
   (let [url            (str base-url url)

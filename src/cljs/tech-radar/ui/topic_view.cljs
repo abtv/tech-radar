@@ -78,14 +78,16 @@
 (defn- pagintation [{:keys [texts records-per-page page-number set-page-number]}]
   (when (seq texts)
     (let [texts-count (count texts)
-          pages-count (/ texts-count records-per-page)
+          pages-count (-> texts-count
+                          (/ records-per-page)
+                          (int))
           pages-count (if (= 0 (mod texts-count records-per-page))
                         pages-count
                         (inc pages-count))]
       [:div.text-center {}
        [:div {}
         [:ul.pagination.no-borders {}
-         (->> (range 1 pages-count)
+         (->> (range 1 (inc pages-count))
               (mapv (page-fn set-page-number page-number)))]]])))
 
 (defui TopicView
