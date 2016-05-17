@@ -228,30 +228,29 @@ ul.alert-dropdown {
 }
 
 .pagination>li>a {
-    color: #bbb;
+     color: #bbb;
+     background-color: #333;
+     border-color: white;
+     cursor: pointer;
+ }
+
+.pagination>li>a:hover {
+    color: white;
     background-color: #333;
     border-color: white;
     cursor: pointer;
 }
 
-.pagination>li>a:hover {
-    color: white;
-    background-color: #888;
-    border-color: white;
-    cursor: pointer;
-}
-
 .pagination>.active>a {
-    color: white;
-    background-color: black;
-    border-color: black;
+    color: #333;
+    background-color: #bbb;
+    border-color: white;
     cursor: default;
 }
 
 .pagination>.active>a:hover {
-    color: white;
-    background-color: #888;
+    color: #333;
+    background-color: #bbb;
     border-color: white;
     cursor: default;
 }
-
