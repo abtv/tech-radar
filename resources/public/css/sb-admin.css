@@ -228,29 +228,29 @@ ul.alert-dropdown {
 }
 
 .pagination>li>a {
-     color: #bbb;
-     background-color: #333;
-     border-color: white;
-     cursor: pointer;
+    color: #333;
+    background-color: #bbb;
+    border-color: white;
+    cursor: default;
  }
 
 .pagination>li>a:hover {
+    color: white;
+    background-color: #bbb;
+    border-color: white;
+    cursor: pointer;
+}
+
+.pagination>.active>a {
     color: white;
     background-color: #333;
     border-color: white;
     cursor: pointer;
 }
 
-.pagination>.active>a {
-    color: #333;
-    background-color: #bbb;
-    border-color: white;
-    cursor: default;
-}
-
 .pagination>.active>a:hover {
-    color: #333;
-    background-color: #bbb;
+    color: white;
+    background-color: #333;
     border-color: white;
     cursor: default;
 }
