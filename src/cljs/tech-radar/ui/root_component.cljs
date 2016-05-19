@@ -9,32 +9,28 @@
             [tech-radar.ui.trends-view :refer [trends-view
                                                TrendsView]]))
 
-(defmulti screen (fn [this props]
-                   (:current-screen props)))
-
-(defmethod screen :trends [this props]
-  (trends-view props))
-
-(defmethod screen :topic [this props]
-  (topic-view (om/computed props {:set-page-number (fn [page-number]
-                                                     #(om/transact! this `[(page-number/set {:page-number ~page-number})
-                                                                           [:settings]]))})))
-
 (defui RootComponent
   static om/IQuery
   (query [this]
-    `[{:navbar-settings ~(om/get-query NavBar)}
-      {:settings [:topic-items]}
-      :trends
-      :topics
-      :current-screen
-      :current-topic])
+    `[{:settings ~(om/get-query NavBar)}  ; Construct cursor for NavBar
+      :current-screen                     ; Required for dispatching main view
+      :current-topic                      ; For mixing
+      :state                              ; Because TopicView & TrendsView required full state
+      ])
   Object
+  (set-page-number [this cnt]
+    (om/transact! this `[(page-number/set {:page-number ~cnt}) [:settings]]))
+
   (render [this]
-    (let [{:keys [navbar-settings
-                  current-topic] :as props} (om/props this)]
-      (html [:div#wrapper {}
-             (nav-bar (om/computed navbar-settings
-                                   {:current-topic current-topic}))
-             [:div#page-wrapper {}
-              (screen this props)]]))))
+    (let [{:keys [settings current-screen current-topic state]} (om/props this)]
+      (html
+        [:div#wrapper {}
+         (nav-bar (merge settings
+                         {:current-topic current-topic}))
+         [:div#page-wrapper {}
+          (condp = current-screen
+            :trends (trends-view state)
+            (topic-view (om/computed state
+                                     {:set-page-number
+                                      (fn [page-number]
+                                        #(.set-page-number this page-number))})))]]))))

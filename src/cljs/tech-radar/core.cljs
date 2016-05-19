@@ -6,11 +6,14 @@
             [tech-radar.ui.root-component :refer [RootComponent]]
             [tech-radar.parser :refer [parser]]))
 
+(enable-console-print!)
 (init-routes)
 (init-history)
 
-(def reconciler (om/reconciler {:state  app-state
-                                :parser parser}))
+(def reconciler
+  (om/reconciler {:state app-state
+                  :normalize false
+                  :parser parser}))
 
 (om/add-root! reconciler
               RootComponent
