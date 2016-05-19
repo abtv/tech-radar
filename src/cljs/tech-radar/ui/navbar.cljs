@@ -27,7 +27,7 @@
                             "active"
                             nil)
                    :key   (str "records_count_" records-count)}
-              [:a {:on-click set-record-count}
+              [:a {:on-click #(set-record-count records-count)}
                records-count]]) [15 20 25 30])]]])
 
 (defn menu-item [{:keys [href name selected]}]
@@ -64,13 +64,12 @@
   (set-record-count [this cnt]
     (om/transact! this `[(records-per-page/set {:records-per-page ~cnt})
                          {:settings [:records-per-page]}]))
-
   (render [this]
     (let [{:keys [records-per-page topic-items current-topic]} (om/props this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
              #_(search-input)
-             (navbar-right records-per-page #(.set-record-count this records-per-page))
+             (navbar-right records-per-page #(.set-record-count this %))
              (sidebar-menu-items topic-items current-topic)]))))
 
 (def nav-bar (om/factory NavBar))
