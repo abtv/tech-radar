@@ -7,15 +7,16 @@
             [tech-radar.ui.topic-view :refer [topic-view
                                               TopicView]]
             [tech-radar.ui.trends-view :refer [trends-view
-                                               TrendsView]]))
+                                               TrendsView]]
+            [tech-radar.ui.home :refer [home]]))
 
 (defui RootComponent
   static om/IQuery
   (query [this]
-    `[{:settings ~(om/get-query NavBar)}  ; Construct cursor for NavBar
-      :current-screen                     ; Required for dispatching main view
-      :current-topic                      ; For mixing
-      :state                              ; Because TopicView & TrendsView required full state
+    `[{:settings ~(om/get-query NavBar)}                    ; Construct cursor for NavBar
+      :current-screen                                       ; Required for dispatching main view
+      :current-topic                                        ; For mixing
+      :state                                                ; Because TopicView & TrendsView required full state
       ])
   Object
   (set-page-number [this cnt]
@@ -29,6 +30,7 @@
                          {:current-topic current-topic}))
          [:div#page-wrapper {}
           (condp = current-screen
+            :home (home state)
             :trends (trends-view state)
             (topic-view (om/computed state
                                      {:set-page-number

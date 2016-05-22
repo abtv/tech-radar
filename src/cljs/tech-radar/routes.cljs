@@ -6,18 +6,26 @@
             [tech-radar.services.trends :refer [run-trends]]
             [tech-radar.services.topics :refer [show-topic]]))
 
-(declare charts-view)
-(declare table-view)
+(declare home-view)
+(declare trends-view)
+(declare topic-view)
 
 (defn init-routes []
-  (defroute charts-view "/" []
+  (defroute home-view "/" []
     (run-trends app-state)
     (swap! app-state (fn [state]
-                         (-> state
-                             (assoc-in [:current-screen] :trends)
-                             (assoc :current-topic nil)
-                             (assoc-in [:settings :page-number] 1)))))
-  (defroute table-view "/topic/:topic" [topic]
+                       (-> state
+                           (assoc-in [:current-screen] :home)
+                           (assoc :current-topic nil)
+                           (assoc-in [:settings :page-number] 1)))))
+  (defroute trends-view "/trends" []
+    (run-trends app-state)
+    (swap! app-state (fn [state]
+                       (-> state
+                           (assoc-in [:current-screen] :trends)
+                           (assoc :current-topic nil)
+                           (assoc-in [:settings :page-number] 1)))))
+  (defroute topic-view "/topic/:topic" [topic]
     (let [topic* (keyword topic)]
       (show-topic app-state (keyword topic*))
       (swap! app-state (fn [state]
