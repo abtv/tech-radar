@@ -74,16 +74,19 @@
 (defui ChartsView
   static om/IQuery
   (query [this]
-    [{:settings [:topic-items]} :trends :current-topic])
+    [{:settings [:menu-items :topic-items]} :trends :current-topic])
   Object
   (render [this]
-    (let [{{topic-items :topic-items} :settings
+    (let [{{menu-items  :menu-items
+            topic-items :topic-items} :settings
            trends                     :trends} (om/props this)
           width  400
           height 400]
       (html
         [:div {:id "charts-view"}
-         (->> topic-items
+         (->> menu-items
+              (filter (fn [[k _]]
+                        (topic-items k)))
               (partition-all 2)
               (map-indexed (fn [idx items]
                              [:div.row {:key (str "radar_" idx)}

@@ -95,14 +95,14 @@
   (query [this]
     [:topics
      :current-topic
-     {:settings [:topic-items
+     {:settings [:menu-items
                  :records-per-page
                  :page-number]}])
   Object
   (render [this]
     (let [{topics                          :topics
            current-topic                   :current-topic
-           {topic-items      :topic-items
+           {topic-items      :menu-items
             records-per-page :records-per-page
             page-number      :page-number} :settings} (om/props this)
           name  (topic-name topic-items current-topic)

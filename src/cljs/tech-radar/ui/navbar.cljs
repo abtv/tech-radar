@@ -57,20 +57,20 @@
   static om/IQuery
   (query [this]
     [:records-per-page
-     :topic-items
+     :menu-items
      :page-number])
   Object
   (set-record-count [this cnt]
     (om/transact! this `[(records-per-page/set {:records-per-page ~cnt})
                          {:settings [:records-per-page]}]))
   (render [this]
-    (let [{:keys [records-per-page topic-items]} (om/props this)
+    (let [{:keys [records-per-page menu-items]} (om/props this)
           {:keys [current-screen current-topic]} (om/get-computed this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
              #_(search-input)
              (when (= :topic current-screen)
                (records-per-page-settings records-per-page #(.set-record-count this %)))
-             (sidebar-menu-items topic-items current-topic)]))))
+             (sidebar-menu-items menu-items current-topic)]))))
 
 (def nav-bar (om/factory NavBar))
