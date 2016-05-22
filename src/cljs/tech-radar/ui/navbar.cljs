@@ -15,7 +15,7 @@
      [:a.navbar-brand {:href "#/"} "Tech Radar"]
      [:img {:src "images/radar.svg"}]]))
 
-(defn navbar-right [records-per-page set-record-count]
+(defn records-per-page-settings [records-per-page set-record-count]
   [:ul {:class "nav navbar-right top-nav"}
    [:li {:class "dropdown"}
     [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown", :aria-expanded "false"}
@@ -58,18 +58,19 @@
   (query [this]
     [:records-per-page
      :topic-items
-     :page-number
-     :current-topic])
+     :page-number])
   Object
   (set-record-count [this cnt]
     (om/transact! this `[(records-per-page/set {:records-per-page ~cnt})
                          {:settings [:records-per-page]}]))
   (render [this]
-    (let [{:keys [records-per-page topic-items current-topic]} (om/props this)]
+    (let [{:keys [records-per-page topic-items]} (om/props this)
+          {:keys [current-screen current-topic]} (om/get-computed this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
              #_(search-input)
-             (navbar-right records-per-page #(.set-record-count this %))
+             (when (= :topic current-screen)
+               (records-per-page-settings records-per-page #(.set-record-count this %)))
              (sidebar-menu-items topic-items current-topic)]))))
 
 (def nav-bar (om/factory NavBar))

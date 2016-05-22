@@ -26,8 +26,9 @@
     (let [{:keys [settings current-screen current-topic state]} (om/props this)]
       (html
         [:div#wrapper {}
-         (nav-bar (merge settings
-                         {:current-topic current-topic}))
+         (nav-bar (om/computed settings
+                               {:current-screen current-screen
+                                :current-topic  current-topic}))
          [:div#page-wrapper {}
           (condp = current-screen
             :home (home state)
