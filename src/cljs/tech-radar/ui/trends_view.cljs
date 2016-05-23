@@ -38,36 +38,42 @@
             :y-axis  "hashtag"
             :name    name}})
 
-(defn get-div-dimensions [id]
-  (let [e (.getElementById js/document id)
-        x (.-clientWidth e)
-        y (.-clientHeight e)]
-    {:width x :height y}))
+(defn get-chart-size [id]
+  (let [e            (.getElementById js/document id)
+        x            (.-clientWidth e)
+        width-offset 30
+        height       400]
+    {:width (- x width-offset) :height height}))
 
 (defui Chart
   Object
   (componentDidMount [this]
-    (let [{:keys [data] :as props} (om/props this)
-          params (new-chart-params props)]
-      (draw-chart data params)))
+    (let [{:keys [data parent-id] :as props} (om/props this)
+          params (new-chart-params props)
+          size   (get-chart-size parent-id)]
+      (om/set-state! this size)
+      (draw-chart data (merge params size))))
   (componentDidUpdate [this _ _]
-    (let [{:keys [id data] :as props} (om/props this)
-          params (new-chart-params props)]
+    (let [{:keys [id parent-id data] :as props} (om/props this)
+          params (new-chart-params props)
+          size   (get-chart-size parent-id)]
       (let [n (.getElementById js/document id)]
         (while (.hasChildNodes n)
           (.removeChild n (.-lastChild n))))
       (when data
-        (draw-chart data params))))
-  #_(componentWillMount [this]
-                        (.addEventListener js/window
-                                           "resize" (fn []
-                                                      (let [{:keys [width height]} (get-div-dimensions "charts-view")]
-                                                        (js/console.log width)
-                                                        #_(om/update cursor :div {:width width :height height})))))
+        (draw-chart data (merge params size)))))
+  (componentWillMount [this]
+    (let [{:keys [parent-id]} (om/props this)]
+      (.addEventListener js/window
+                         "resize" (fn []
+                                    (om/set-state! this (get-chart-size parent-id))))))
   (render [this]
-    (let [props (om/props this)]
+    (let [{:keys [id]} (om/props this)
+          {:keys [width height]} (om/get-state this)]
       (html
-        [:div (select-keys props [:id :width :height])]))))
+        [:div {:id     id
+               :width  width
+               :height height}]))))
 
 (def chart (om/factory Chart))
 
@@ -79,9 +85,7 @@
   (render [this]
     (let [{{menu-items  :menu-items
             topic-items :topic-items} :settings
-           trends                     :trends} (om/props this)
-          width  400
-          height 400]
+           trends                     :trends} (om/props this)]
       (html
         [:div {:id "charts-view"}
          (->> menu-items
@@ -92,13 +96,13 @@
                              [:div.row {:key (str "radar_" idx)}
                               (->> items
                                    (map (fn [[id {:keys [name]}]]
-                                          [:div.col-lg-6
-                                           (when-let [data (id trends)]
-                                             (chart {:id     (cljs.core/name id)
-                                                     :name   name
-                                                     :data   data
-                                                     :width  width
-                                                     :height height}))])))])))]))))
+                                          (let [parent-id (str "chart-div-" (cljs.core/name name))]
+                                            [:div.col-lg-6 {:id parent-id}
+                                             (when-let [data (id trends)]
+                                               (chart {:id        (cljs.core/name id)
+                                                       :name      name
+                                                       :data      data
+                                                       :parent-id parent-id}))]))))])))]))))
 
 (def charts-view (om/factory ChartsView))
 
