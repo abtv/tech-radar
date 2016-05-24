@@ -1,51 +1,130 @@
 (ns tech-radar.services.analysis
-  (:require [clojure.core.async :refer [thread go-loop timeout chan <! >! <!! >!! close!]]
+  (:require [clojure.core.async :refer [thread go-loop timeout chan <! >! <!! >!! close! alts!!]]
             [taoensso.timbre :as timbre]
             [tech-radar.components.counter :refer [increment
                                                    decrement]]
-            [tech-radar.database.database :refer [load-topic]]
-            [clj-time.local :as local]
-            [clj-time.core :as time]
+            [tech-radar.database.tweets :refer [load-tweets]]
+            [tech-radar.database.hashtags :refer [load-daily-hashtags
+                                                  load-weekly-hashtags
+                                                  load-monthly-hashtags]]
             [clj-time.coerce :refer [to-sql-time]]
             [tech-radar.analytics.protocols :refer [init
-                                                    add]]))
+                                                    add
+                                                    trends
+                                                    texts
+                                                    reset-trends]]
+            [tech-radar.analytics.cache :refer [set-cached-trends
+                                                set-cached-texts]]
+            [clj-time.local :as local]
+            [clj-time.core :as time]))
 
-(defn load-data [database topics load-data-hours]
-  (when-not load-data-hours
-    (throw (Exception. "you have to provide load-data-hours param")))
-  (let [from (-> (local/local-now)
-                 (time/minus (time/hours load-data-hours))
-                 (to-sql-time))
-        to   (-> (local/local-now)
-                 (to-sql-time))]
-    (->> topics
-         (reduce (fn [data topic]
-                   (->> (load-topic database {:topic topic
-                                              :from  from
-                                              :to    to})
-                        (assoc data topic))) {}))))
+(defn load-topic [database {:keys [topic max-tweet-count]}]
+  (let [tweets  (load-tweets database {:topic           topic
+                                       :max-tweet-count max-tweet-count})
+        daily   (load-daily-hashtags database topic)
+        weekly  (load-weekly-hashtags database topic)
+        monthly (load-monthly-hashtags database topic)]
+    {:texts    tweets
+     :hashtags {:daily   daily
+                :weekly  weekly
+                :monthly monthly}}))
 
-(defn- reload-model [{:keys [model database topics load-data-hours]}]
-  (timbre/info "reloading model")
-  (let [data (load-data database topics load-data-hours)]
-    (init model data)))
+(defn load-data [database topics max-tweet-count]
+  (when-not max-tweet-count
+    (throw (Exception. "you have to provide max-tweet-count param")))
+  (->> topics
+       (reduce (fn [data topic]
+                 (->> (load-topic database {:topic           topic
+                                            :max-tweet-count max-tweet-count})
+                      (assoc data topic))) {})))
 
-(defn run [{:keys [model analysis-chan metrics load-data-hours] :as params}]
-  (go-loop []
-    (<! (timeout (* 3600 1000 load-data-hours)))
-    (when (>! analysis-chan {:reload true})
-      (recur)))
+(defmulti load-hashtags (fn [type database topic]
+                          type))
+
+(defmethod load-hashtags :daily [_ database topic]
+  (load-daily-hashtags database topic))
+
+(defmethod load-hashtags :weekly [_ database topic]
+  (load-weekly-hashtags database topic))
+
+(defmethod load-hashtags :monthly [_ database topic]
+  (load-monthly-hashtags database topic))
+
+(defn- reload-hashtags [type database topics]
+  (map (fn [topic]
+         [topic (load-hashtags type database topic)])
+       topics))
+
+(defn run-hashtags-update [{:keys [database topics analysis-chan metrics]}]
+  (let [stop-chan   (chan)
+        last-update (atom {:daily   (local/local-now)
+                           :weekly  (local/local-now)
+                           :monthly (local/local-now)})
+        exceed?     (fn [type offset]
+                      (let [now              (local/local-now)
+                            last-update-time (type @last-update)]
+                        (time/before? (time/plus last-update-time offset) now)))
+        reload-fn   (fn [hashtag-type]
+                      (increment metrics :analysis-chan)
+                      (>!! analysis-chan {:type         :hashtags-update
+                                          :hashtag-type hashtag-type
+                                          :hashtags     (reload-hashtags hashtag-type database topics)})
+                      (swap! last-update assoc-in [hashtag-type] (local/local-now)))
+        process     (thread
+                      (loop []
+                        (let [daily-offset   (time/hours 1)
+                              weekly-offset  (time/hours 12)
+                              monthly-offset (time/hours 24)
+                              reload         (timeout 1000)
+                              [_ c] (alts!! [reload stop-chan])]
+                          (when (= reload c)
+                            (when (exceed? :daily daily-offset)
+                              (reload-fn :daily))
+                            (when (exceed? :weekly weekly-offset)
+                              (reload-fn :weekly))
+                            (when (exceed? :monthly monthly-offset)
+                              (reload-fn :monthly))
+                            (recur)))))
+        stop-fn     (fn []
+                      (close! stop-chan)
+                      (<!! process))]
+    stop-fn))
+
+(defn run-model-update [{:keys [model analysis-chan metrics]}]
   (thread
     (timbre/info "analysis started")
     (loop []
-      (when-let [{:keys [reload] :as tweet} (<!! analysis-chan)]
-        (if reload
-          (reload-model params)
-          (do
-            (decrement metrics :analysis-chan)
-            (when-not (seq (:topics tweet))
-              (timbre/warn (str "Can't classify text: \"" (:text tweet) "\"")))
-            (add model tweet)
-            (increment metrics :total-texts)))
+      (when-let [{:keys [type tweet hashtag-type hashtags]} (<!! analysis-chan)]
+        (decrement metrics :analysis-chan)
+        (case type
+          :tweet (if (seq (:topics tweet))
+                   (do
+                     (add model tweet)
+                     (increment metrics :total-texts))
+                   (timbre/warn (str "Can't classify text: \"" (:text tweet) "\"")))
+          :hashtags-update (reset-trends model hashtag-type hashtags))
         (recur)))
     (timbre/info "analysis finished")))
+
+(defn cache-update-fn [model cache topics]
+  (timbre/info "cache update")
+  (->> (trends model)
+       (set-cached-trends cache))
+  (doseq [topic topics]
+    (->> (texts model topic)
+         (set-cached-texts cache topic))))
+
+(defn run-cache-update [{:keys [model cache topics cache-update-timeout-s]}]
+  (let [stop-chan (chan)
+        process   (thread
+                    (timbre/info "cache update started")
+                    (loop []
+                      (let [tmt (timeout (* 1000 cache-update-timeout-s))
+                            [_ c] (alts!! [tmt stop-chan])]
+                        (when (= tmt c)
+                          (cache-update-fn model cache topics)
+                          (recur))))
+                    (timbre/info "cache update finished"))]
+    (fn []
+      (close! stop-chan)
+      (<!! process))))

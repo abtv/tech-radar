@@ -1,6 +1,9 @@
 (ns tech-radar.components.analysis
   (:require [tech-radar.services.analysis :refer [load-data
-                                                  run]]
+                                                  cache-update-fn
+                                                  run-model-update
+                                                  run-hashtags-update
+                                                  run-cache-update]]
             [com.stuartsierra.component :as component]
             [clojure.core.async :refer [chan close!]]
             [taoensso.timbre :as timbre]
@@ -8,11 +11,28 @@
             [tech-radar.utils.parsers :refer [parse-int]]
             [tech-radar.utils.settings :refer [load-classify-settings]]
             [tech-radar.analytics.model :refer [new-model]]
-            [tech-radar.analytics.protocols :refer [init
-                                                    trends
-                                                    topic]]))
+            [tech-radar.analytics.cache :refer [new-cache
+                                                get-cached-trends
+                                                get-cached-texts]]
+            [tech-radar.analytics.protocols :refer [init]]))
 
-(defrecord Analysis [database metrics preprocessor get-trends-fn get-texts-fn]
+(defn- get-settings []
+  {:max-hashtags-per-trend (-> env
+                               (:max-hashtags-per-trend)
+                               (parse-int))
+   :max-texts-per-request  (-> env
+                               (:max-texts-per-request)
+                               (parse-int))
+   :max-tweet-count        (-> env
+                               (:max-tweet-count)
+                               (parse-int))
+   :cache-update-timeout-s (-> env
+                               (:cache-update-timeout-s)
+                               (parse-int))})
+
+(defrecord Analysis [database metrics preprocessor
+                     stop-hashtags-update-fn stop-cache-update-fn
+                     get-trends-fn get-texts-fn]
   component/Lifecycle
   (start [component]
     (if get-trends-fn
@@ -20,35 +40,40 @@
       (do
         (timbre/info "Initializing analysis")
         (let [{:keys [topics]} (load-classify-settings)
-              max-hashtags-per-trend (-> env
-                                         (:max-hashtags-per-trend)
-                                         (parse-int))
-              max-texts-per-request  (-> env
-                                         (:max-texts-per-request)
-                                         (parse-int))
-              load-data-hours        (-> env
-                                         (:load-data-hours)
-                                         (parse-int))
-              model                  (new-model {:max-hashtags-per-trend max-hashtags-per-trend
-                                                 :max-texts-per-request  max-texts-per-request})
-              database*              (:database database)
-              topics*                (map first topics)
-              initial-data           (load-data database* topics* load-data-hours)]
-          (init model initial-data)
-          (run {:database        database*
-                :topics          topics*
-                :load-data-hours load-data-hours
-                :model           model
-                :analysis-chan   (:analysis-chan preprocessor)
-                :metrics         metrics})
-          (assoc component :get-trends-fn (fn []
-                                            (trends model))
-                           :get-texts-fn (fn [topic*]
-                                           (topic model topic*)))))))
+              {:keys [max-hashtags-per-trend max-texts-per-request max-tweet-count cache-update-timeout-s]} (get-settings)
+              topics                  (map first topics)
+              database                (:database database)
+              analysis-chan           (:analysis-chan preprocessor)
+              model                   (new-model topics {:max-hashtags-per-trend max-hashtags-per-trend
+                                                         :max-texts-per-request  max-texts-per-request})
+              cache                   (new-cache)
+              initial-data            (load-data database topics max-tweet-count)
+              _                       (do
+                                        (init model initial-data)
+                                        (cache-update-fn model cache topics)
+                                        (run-model-update {:model         model
+                                                           :analysis-chan analysis-chan
+                                                           :metrics       metrics}))
+              stop-hashtags-update-fn (run-hashtags-update {:database      database
+                                                            :topics        topics
+                                                            :analysis-chan analysis-chan
+                                                            :metrics       metrics})
+              stop-cache-update-fn    (run-cache-update {:model                  model
+                                                         :cache                  cache
+                                                         :topics                 topics
+                                                         :cache-update-timeout-s cache-update-timeout-s})]
+          (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
+                           :stop-cache-update-fn stop-cache-update-fn
+                           :get-trends-fn (fn []
+                                            (get-cached-trends cache))
+                           :get-texts-fn (fn [topic]
+                                           (get-cached-texts cache topic)))))))
   (stop [component]
-    (when get-trends-fn
+    (when stop-cache-update-fn
       (timbre/info "Stopping analysis")
-      (dissoc component :get-trends-fn :get-texts-fn))))
+      (stop-cache-update-fn)
+      (stop-hashtags-update-fn)
+      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :get-trends-fn :get-texts-fn))))
 
 (defn new-analysis []
   (map->Analysis {}))

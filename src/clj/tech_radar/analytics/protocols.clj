@@ -2,10 +2,11 @@
 
 (defprotocol Analyze
   (trends [this])
-  (topic [this topic]))
+  (texts [this topic]))
 
 (defprotocol Storage
-  (init [this initial-data]))
+  (init [this initial-data])
+  (reset-trends [this hashtags-type hashtags]))
 
 (defprotocol Tweet
   (add [this tweet]))

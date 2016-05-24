@@ -10,12 +10,25 @@
     (str "0" n)
     (str n)))
 
-(defn- time->str [t]
+(defn- today? [t now]
+  (and (= (.getFullYear t) (.getFullYear now))
+       (= (.getMonth t) (.getMonth now))
+       (= (.getDate t) (.getDate now))))
+
+(defn- time->str [t now]
   (let [hours   (-> (.getHours t)
                     (format-time-number))
         minutes (-> (.getMinutes t)
                     (format-time-number))]
-    (str hours ":" minutes)))
+    (if (today? t now)
+      (str "today " hours ":" minutes)
+      (let [year  (.getFullYear t)
+            month (-> (.getMonth t)
+                      (inc)
+                      (format-time-number))
+            day   (-> (.getDate t)
+                      (format-time-number))]
+        (str day "." month "." year " " hours ":" minutes)))))
 
 (defui TextItem
   Object
@@ -30,13 +43,15 @@
 (defui TopicItem
   Object
   (render [this]
-    (let [{:keys [id twitter-id created-at text]} (om/props this)]
-
+    (let [{:keys [id twitter-id created-at text]} (om/props this)
+          now (js/Date.)]
       (html
         [:tr {}
-         [:td {} [:a {:href   (str "https://twitter.com/statuses/" twitter-id)
-                      :target "_blank"}
-                  (time->str created-at)]]
+         [:td {}
+          [:div.text-center
+           [:a {:href   (str "https://twitter.com/statuses/" twitter-id)
+                :target "_blank"}
+            (time->str created-at now)]]]
          [:td {} (text-item {:id   id
                              :text text})]]))))
 
@@ -51,8 +66,8 @@
          [:table {:class "table table-bordered table-hover table-striped"}
           [:thead {}
            [:tr {}
-            [:th {} "Time"]
-            [:th {} "Text"]]]
+            [:th {:class "text-center"} "Time"]
+            [:th {:class "text-center"} "Text"]]]
           [:tbody
            (->> texts
                 (drop (* (dec page-number) records-per-page))

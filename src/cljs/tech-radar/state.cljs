@@ -29,5 +29,6 @@
                       :page-number      1}
      :current-screen :trends
      :current-topic  nil
+     :trend-type     :daily
      :trends         {}
      :topics         {}}))

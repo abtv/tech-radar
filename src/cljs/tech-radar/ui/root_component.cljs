@@ -14,6 +14,7 @@
   static om/IQuery
   (query [this]
     `[{:settings ~(om/get-query NavBar)}                    ; Construct cursor for NavBar
+      :trend-type
       :current-screen                                       ; Required for dispatching main view
       :current-topic                                        ; For mixing
       :state                                                ; Because TopicView & TrendsView required full state
@@ -21,6 +22,8 @@
   Object
   (set-page-number [this cnt]
     (om/transact! this `[(page-number/set {:page-number ~cnt}) [:settings]]))
+  (set-trend-type [this trend-type]
+    (om/transact! this `[(trend-type/set {:trend-type ~trend-type}) [:settings]]))
 
   (render [this]
     (let [{:keys [settings current-screen current-topic state]} (om/props this)]
@@ -32,7 +35,10 @@
          [:div#page-wrapper {}
           (condp = current-screen
             :home (home state)
-            :trends (trends-view state)
+            :trends (trends-view (om/computed state
+                                              {:set-trend-type
+                                               (fn [trend-type]
+                                                 (.set-trend-type this trend-type))}))
             (topic-view (om/computed state
                                      {:set-page-number
                                       (fn [page-number]

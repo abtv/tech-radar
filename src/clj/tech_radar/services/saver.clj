@@ -10,21 +10,22 @@
             [taoensso.timbre :as timbre]
             [tech-radar.components.counter :refer [increment
                                                    decrement]]
-            [tech-radar.database.database :refer [insert-tweet
-                                                  insert-tweet-hashtags
-                                                  insert-tweet-topics]]))
+            [tech-radar.database.tweets :refer [insert-tweet
+                                                insert-tweet-topics]]
+            [tech-radar.database.hashtags :refer [insert-tweet-hashtags]]))
 
 (defn- save-tweet [database tweet]
   (try
-    (jdbc/with-db-transaction [conn database]
-      (let [tweet-id (insert-tweet tweet conn)
-            topics   (:topics tweet)]
-        (doseq [topic topics]
-          (insert-tweet-hashtags (assoc tweet :topic topic) conn))
-        (insert-tweet-topics (assoc tweet :tweet-id tweet-id) conn)
-        (assoc tweet :id tweet-id)))
+    (when-let [topics (seq (:topics tweet))]
+      (jdbc/with-db-transaction [conn database]
+        (let [tweet-id (insert-tweet tweet conn)]
+          (doseq [topic topics]
+            (insert-tweet-hashtags (assoc tweet :topic topic) conn))
+          (insert-tweet-topics (assoc tweet :tweet-id tweet-id) conn)
+          (assoc tweet :id tweet-id))))
     (catch Exception ex
-      (timbre/error (.getMessage ex)))))
+      (timbre/error (.getMessage ex))
+      nil)))
 
 (defn run [{:keys [save-chan analysis-chan metrics database]}]
   (thread
@@ -32,8 +33,9 @@
     (loop []
       (when-let [tweet (<!! save-chan)]
         (decrement metrics :save-chan)
-        (let [tweet (save-tweet database tweet)]
+        (when-let [tweet (save-tweet database tweet)]
           (increment metrics :analysis-chan)
-          (>!! analysis-chan tweet)
-          (recur))))
+          (>!! analysis-chan {:type  :tweet
+                              :tweet tweet}))
+        (recur)))
     (timbre/info "saver finished")))
