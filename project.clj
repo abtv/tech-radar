@@ -25,8 +25,6 @@
                  [reloaded.repl "0.2.1"]
                  [environ "1.0.2"]
                  [com.taoensso/timbre "4.3.1"]
-                 [environ "1.0.2"]
-                 [com.taoensso/timbre "4.3.1"]
                  [camel-snake-kebab "0.3.2"]
                  [org.omcljs/om "1.0.0-alpha34"]
                  [sablono "0.6.2"]
@@ -35,8 +33,7 @@
                  [figwheel-sidecar "0.5.0-6"]
                  [com.cemerick/piggieback "0.2.1"]
                  [secretary "1.2.3"]
-                 [cljsjs/dimple "2.1.2-0"]
-                 [com.cognitect/transit-clj "0.8.285"]]
+                 [cljsjs/dimple "2.1.2-0"]]
 
   :source-paths ["src/cljc" "src/clj" "src/cljs"]
 
