@@ -61,17 +61,19 @@
                                  :compiler     {:optimizations :advanced
                                                 :output-to     "frontend-release/main.js"}}}}
 
-  :profiles {:dev     {:global-vars {*warn-on-reflection* true
-                                     *assert*             false}
+  :profiles {:dev     {:global-vars {;*warn-on-reflection* true
+                                     *assert* false}
                        :env         {:host                   "localhost"
                                      :port                   "3000"
                                      :database               "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
                                      :twitter-security       "twitter-security.edn"
                                      :twitter-settings       "twitter-settings.edn"
                                      :classify-settings      "classify-settings.edn"
+                                     :cache-update-timeout-s "10"
                                      :max-hashtags-per-trend "25"
                                      :max-texts-per-request  "200"
-                                     :load-data-hours        "24"
+                                     :max-tweet-count        "1000"
+                                     :gc-threshold           "100"
                                      :metrics-timeout-s      "30"
                                      :log-path               "./logs/tech-radar.log"
                                      :max-log-size-mb        "1"
@@ -86,9 +88,11 @@
                                      :twitter-security       "twitter-security.edn"
                                      :twitter-settings       "twitter-settings.edn"
                                      :classify-settings      "classify-settings.edn"
+                                     :cache-update-timeout-s "10"
                                      :max-hashtags-per-trend "25"
                                      :max-texts-per-request  "200"
-                                     :load-data-hours        "24"
+                                     :max-tweet-count        "1000"
+                                     :gc-threshold           "100"
                                      :metrics-timeout-s      "300"
                                      :log-path               "./logs/tech-radar.log"
                                      :max-log-size-mb        "1"

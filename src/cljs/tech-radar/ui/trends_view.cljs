@@ -85,7 +85,8 @@
   (render [this]
     (let [{{menu-items  :menu-items
             topic-items :topic-items} :settings
-           trends                     :trends} (om/props this)]
+           trends                     :trends} (om/props this)
+          {:keys [trend-type]} (om/get-computed this)]
       (html
         [:div {:id "charts-view"}
          (->> menu-items
@@ -98,7 +99,9 @@
                                    (map (fn [[id {:keys [name]}]]
                                           (let [parent-id (str "chart-div-" (cljs.core/name name))]
                                             [:div.col-lg-6 {:id parent-id}
-                                             (when-let [data (id trends)]
+                                             (when-let [data (-> trends
+                                                                 (id)
+                                                                 (trend-type))]
                                                (chart {:id        (cljs.core/name id)
                                                        :name      name
                                                        :data      data
@@ -106,20 +109,43 @@
 
 (def charts-view (om/factory ChartsView))
 
+(defn- trend-type->name [type]
+  (case type
+    :daily "Daily"
+    :weekly "Weekly"
+    :monthly "Monthly"))
+
+(defn trend-item [trend-type current-trend-type set-trend-type]
+  (let [name (trend-type->name trend-type)]
+    [:li {:key      (str "page-" name)
+          :class    (if (= trend-type current-trend-type)
+                      "active cursor"
+                      "cursor")
+          :on-click #(set-trend-type trend-type)}
+     [:a
+      name]]))
+
 (defui TrendsView
   static om/IQuery
   (query [this]
-    (om/get-query ChartsView))
+    (conj (om/get-query ChartsView) :trend-type))
   Object
   (render [this]
     (html
-      (let [{:keys [trends] :as props} (om/props this)]
+      (let [{:keys [trends trend-type] :as props} (om/props this)
+            {:keys [set-trend-type]} (om/get-computed this)]
         [:div.container-fluid
-         [:div.row
-          [:div.col-lg-12
-           [:h3 {:class "page-header"} "Trends"]]]
          (if (seq trends)
-           (charts-view props)
+           [:div
+            [:div.row
+             [:div.col-lg-12
+              [:div.text-center {}
+               [:div {}
+                [:ul.pagination.no-borders {}
+                 (trend-item :daily trend-type set-trend-type)
+                 (trend-item :weekly trend-type set-trend-type)
+                 (trend-item :monthly trend-type set-trend-type)]]]]]
+            (charts-view (om/computed props {:trend-type trend-type}))]
            (loading-view {:text "Loading trends, please wait."}))]))))
 
 (def trends-view (om/factory TrendsView))

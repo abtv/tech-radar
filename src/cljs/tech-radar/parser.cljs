@@ -33,6 +33,10 @@
   (let [{:keys [page-number]} params]
     {:action (swap! state assoc-in [:settings :page-number] page-number)}))
 
+(defmethod mutate 'trend-type/set [{:keys [state] :as env} key params]
+  (let [{:keys [trend-type]} params]
+    {:action (swap! state assoc-in [:trend-type] trend-type)}))
+
 (defmethod mutate :default [{:keys [state] :as env} key params]
   (js/console.log "mutate not found")
   {:value :not-found})

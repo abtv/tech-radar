@@ -10,4 +10,4 @@
 (defn topic-resource [{:keys [get-texts-fn] :as analysis}]
   (resource-handler entry-params
     :handle-ok (fn [{{{topic :topic} :params} :request :as ctx}]
-                 (get-texts-fn topic))))
+                 (get-texts-fn (keyword topic)))))
