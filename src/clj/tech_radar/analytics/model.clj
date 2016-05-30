@@ -3,9 +3,18 @@
                                                     Storage
                                                     Tweet]]))
 
-(defn- add-topic-fn [tweet-info hashtags]
+(defn- remove-old-tweets [tweets max-tweet-count]
+  (let [tweet-count (count tweets)]
+    (if (> tweet-count max-tweet-count)
+      (subvec tweets (- tweet-count max-tweet-count))
+      tweets)))
+
+(defn- add-topic-fn [tweet-model hashtags max-tweet-count]
   (fn [data topic]
-    (let [data* (update-in data [topic :texts] (fnil #(conj % tweet-info) []))]
+    (let [data* (update-in data [topic :texts] (fnil (fn [coll]
+                                                       (-> coll
+                                                           (conj tweet-model)
+                                                           (remove-old-tweets max-tweet-count))) []))]
       (update-in data* [topic :hashtags :daily]
                  (fn [values]
                    (let [values* (or values {})]
@@ -19,10 +28,13 @@
                  0)]
     (subvec texts start)))
 
-(defn- add* [data tweet]
+(defn- to-tweet-model [tweet]
+  (select-keys tweet [:id :twitter-id :text :created-at :hashtags]))
+
+(defn- add* [data tweet max-tweet-count]
   (swap! data (fn [data {:keys [topics hashtags] :as tweet}]
-                (let [tweet-info (select-keys tweet [:id :twitter-id :text :created-at :hashtags])]
-                  (reduce (add-topic-fn tweet-info hashtags) data topics))) tweet))
+                (let [tweet-model (to-tweet-model tweet)]
+                  (reduce (add-topic-fn tweet-model hashtags max-tweet-count) data topics))) tweet))
 
 (defn- get-top-hashtags [max-count trends]
   (->> trends
@@ -58,7 +70,9 @@
     nil)
   Tweet
   (add [this tweet]
-    (add* (:data this) tweet)
+    (add* (:data this) tweet (-> this
+                                 (:settings)
+                                 (:max-tweet-count)))
     nil)
   Analyze
   (trends [this]
@@ -69,7 +83,9 @@
       (get-last-texts data topic settings))))
 
 (defn new-model [topics settings]
-  (let [{:keys [max-hashtags-per-trend max-texts-per-request]} settings]
+  (let [{:keys [max-tweet-count max-hashtags-per-trend max-texts-per-request]} settings]
+    (when-not max-tweet-count
+      (throw (Exception. "you have to provide max-tweet-count param")))
     (when-not max-texts-per-request
       (throw (Exception. "you have to provide max-texts-per-request param")))
     (when-not max-hashtags-per-trend
