@@ -8,7 +8,8 @@
                                                     texts]]))
 
 (deftest empty-test
-  (let [model (new-model nil {:max-hashtags-per-trend 25
+  (let [model (new-model nil {:max-tweet-count        1000
+                              :max-hashtags-per-trend 25
                               :max-texts-per-request  200})
         t1    {:id         1
                :text       "just a plain text"
@@ -27,7 +28,8 @@
       (is (= [] nosql)))))
 
 (deftest add-test
-  (let [model      (new-model nil {:max-hashtags-per-trend 25
+  (let [model      (new-model nil {:max-tweet-count        1000
+                                   :max-hashtags-per-trend 25
                                    :max-texts-per-request  200})
         topic-item (fn [tweet]
                      (select-keys tweet [:id :text :created-at]))
