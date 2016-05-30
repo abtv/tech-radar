@@ -59,11 +59,11 @@
           javascript-topic (texts model :javascript)
           linux-topic      (texts model :linux)
           nosql            (texts model :nosql)]
-      (is (= {:clojure    {"react"  2
-                           "ubuntu" 1}
-              :linux      {"react"  1
-                           "ubuntu" 1}
-              :javascript {"react" 1}
+      (is (= {:clojure    {:daily {"react"  2
+                                   "ubuntu" 1}}
+              :linux      {:daily {"react"  1
+                                   "ubuntu" 1}}
+              :javascript {:daily {"react" 1}}
               :nosql      {}}
              trends*))
       (is (= [e1 e3] clojure-topic))

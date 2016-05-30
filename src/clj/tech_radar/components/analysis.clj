@@ -44,7 +44,8 @@
               topics                  (map first topics)
               database                (:database database)
               analysis-chan           (:analysis-chan preprocessor)
-              model                   (new-model topics {:max-hashtags-per-trend max-hashtags-per-trend
+              model                   (new-model topics {:max-tweet-count        max-tweet-count
+                                                         :max-hashtags-per-trend max-hashtags-per-trend
                                                          :max-texts-per-request  max-texts-per-request})
               cache                   (new-cache)
               initial-data            (load-data database topics max-tweet-count)
