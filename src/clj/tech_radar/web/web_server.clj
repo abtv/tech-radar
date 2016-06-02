@@ -2,16 +2,22 @@
   (:require [bidi.bidi :as bidi]
             [bidi.ring :as bidi-ring]
             [tech-radar.web.resources :refer [trends-resource
-                                              topic-resource]]))
+                                              topic-resource
+                                              search-resource]]
+            [taoensso.timbre :as timbre]))
 
 (defn- create-resources [analysis]
   {:trends (trends-resource analysis)
-   :topics (topic-resource analysis)})
+   :topics (topic-resource analysis)
+   :search (search-resource analysis)})
 
 (def get-routes {"trends"           :trends
                  ["topics/" :topic] :topics})
 
-(def site-routes ["/" {:get get-routes}])
+(def post-routes {["search/" :topic] :search})
+
+(def site-routes ["/" {:get  get-routes
+                       :post post-routes}])
 
 (defn create-ring-handler [analysis]
   (let [resources  (create-resources analysis)
@@ -29,3 +35,11 @@
           (assoc-in [:headers "Access-Control-Allow-Methods"] "GET,PUT,POST,DELETE,OPTIONS")
           (assoc-in [:headers "Access-Control-Allow-Headers"]
                     "X-Requested-With,Content-Type,Cache-Control,token")))))
+
+(defn wrap-exception [f]
+  (fn [request]
+    (try (f request)
+         (catch Exception e
+           (timbre/error e)
+           {:status 500
+            :body   "Server error"}))))

@@ -44,11 +44,12 @@
     (mapv (fn [[id params]]
             (menu-item (assoc params :selected (= id current-topic)))) topic-items)]])
 
-(defn search-input []
+(defn search-input [search-text]
   [:form.navbar-form.navbar-right {}
    [:div.input-group {}
     [:input.form-control {:type        "text"
-                          :placeholder "Search..."}]
+                          :placeholder "Search..."
+                          :value       (or search-text "")}]
     [:span.input-group-btn {}
      [:button.btn.btn-default {}
       [:i.fa.fa-search {} ""]]]]])
@@ -58,17 +59,18 @@
   (query [this]
     [:records-per-page
      :menu-items
-     :page-number])
+     :page-number
+     :search-text])
   Object
   (set-record-count [this cnt]
     (om/transact! this `[(records-per-page/set {:records-per-page ~cnt})
                          {:settings [:records-per-page]}]))
   (render [this]
-    (let [{:keys [records-per-page menu-items]} (om/props this)
+    (let [{:keys [records-per-page menu-items search-text]} (om/props this)
           {:keys [current-screen current-topic]} (om/get-computed this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
-             #_(search-input)
+             #_(search-input search-text)
              (when (= :topic current-screen)
                (records-per-page-settings records-per-page #(.set-record-count this %)))
              (sidebar-menu-items menu-items current-topic)]))))

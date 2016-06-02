@@ -5,7 +5,8 @@
             [tech-radar.analytics.protocols :refer [init
                                                     add
                                                     trends
-                                                    texts]]))
+                                                    texts
+                                                    search]]))
 
 (deftest empty-test
   (let [model (new-model nil {:max-tweet-count        1000
@@ -71,4 +72,7 @@
       (is (= [e1 e3] clojure-topic))
       (is (= [e2] javascript-topic))
       (is (= [e1] linux-topic))
-      (is (= [] nosql)))))
+      (is (= [] nosql)))
+    (is (= [{:id 2 :text "React in JavaScript #react"}] (search model :javascript "#react")))
+    (is (= [] (search model :no-topic "#react")))
+    (is (= [{:id 1 :text "React in Clojure under Linux #react #ubuntu"} {:id 3 :text "React in ClojureScript #react"}] (search model :clojure "#react")))))

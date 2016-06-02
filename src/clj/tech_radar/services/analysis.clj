@@ -3,7 +3,8 @@
             [taoensso.timbre :as timbre]
             [tech-radar.components.counter :refer [increment
                                                    decrement]]
-            [tech-radar.database.tweets :refer [load-tweets]]
+            [tech-radar.database.tweets :refer [load-tweets-per-topic
+                                                load-tweets]]
             [tech-radar.database.hashtags :refer [load-daily-hashtags
                                                   load-weekly-hashtags
                                                   load-monthly-hashtags]]
@@ -13,14 +14,13 @@
                                                     trends
                                                     texts
                                                     reset-trends]]
-            [tech-radar.analytics.cache :refer [set-cached-trends
-                                                set-cached-texts]]
+            [tech-radar.analytics.cache :refer [set-cached-trends]]
             [clj-time.local :as local]
             [clj-time.core :as time]))
 
-(defn load-topic [database {:keys [topic max-tweet-count]}]
-  (let [tweets  (load-tweets database {:topic           topic
-                                       :max-tweet-count max-tweet-count})
+(defn- load-topic [database {:keys [topic max-record-count]}]
+  (let [tweets  (load-tweets-per-topic database {:topic            topic
+                                                 :max-record-count max-record-count})
         daily   (load-daily-hashtags database topic)
         weekly  (load-weekly-hashtags database topic)
         monthly (load-monthly-hashtags database topic)]
@@ -29,14 +29,16 @@
                 :weekly  weekly
                 :monthly monthly}}))
 
-(defn load-data [database topics max-tweet-count]
+(defn load-data [database {:keys [topics max-texts-per-request max-tweet-count]}]
   (when-not max-tweet-count
     (throw (Exception. "you have to provide max-tweet-count param")))
-  (->> topics
-       (reduce (fn [data topic]
-                 (->> (load-topic database {:topic           topic
-                                            :max-tweet-count max-tweet-count})
-                      (assoc data topic))) {})))
+  (when-not max-texts-per-request
+    (throw (Exception. "you have to provide max-texts-per-request param")))
+  {:topics (reduce (fn [data topic]
+                     (->> (load-topic database {:topic            topic
+                                                :max-record-count max-texts-per-request})
+                          (assoc data topic))) {} topics)
+   :tweets (load-tweets database max-tweet-count)})
 
 (defmulti load-hashtags (fn [type database topic]
                           type))
@@ -106,15 +108,12 @@
         (recur)))
     (timbre/info "analysis finished")))
 
-(defn cache-update-fn [model cache topics]
+(defn cache-update-fn [model cache]
   (timbre/info "cache update")
   (->> (trends model)
-       (set-cached-trends cache))
-  (doseq [topic topics]
-    (->> (texts model topic)
-         (set-cached-texts cache topic))))
+       (set-cached-trends cache)))
 
-(defn run-cache-update [{:keys [model cache topics cache-update-timeout-s]}]
+(defn run-cache-update [{:keys [model cache cache-update-timeout-s]}]
   (let [stop-chan (chan)
         process   (thread
                     (timbre/info "cache update started")
@@ -122,7 +121,7 @@
                       (let [tmt (timeout (* 1000 cache-update-timeout-s))
                             [_ c] (alts!! [tmt stop-chan])]
                         (when (= tmt c)
-                          (cache-update-fn model cache topics)
+                          (cache-update-fn model cache)
                           (recur))))
                     (timbre/info "cache update finished"))]
     (fn []

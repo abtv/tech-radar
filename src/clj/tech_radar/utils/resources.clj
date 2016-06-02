@@ -30,8 +30,14 @@
 (defn resource-handler [defaults & kvs]
   (apply resource defaults kvs))
 
-(def entry-params
+(def get-resource
   {:allowed-methods       [:get]
+   :available-media-types available-media-types
+   :as-response           as-response
+   :handle-exception      handle-exception})
+
+(def post-resource
+  {:allowed-methods       [:post]
    :available-media-types available-media-types
    :as-response           as-response
    :handle-exception      handle-exception})

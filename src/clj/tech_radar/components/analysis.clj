@@ -12,9 +12,10 @@
             [tech-radar.utils.settings :refer [load-classify-settings]]
             [tech-radar.analytics.model :refer [new-model]]
             [tech-radar.analytics.cache :refer [new-cache
-                                                get-cached-trends
-                                                get-cached-texts]]
-            [tech-radar.analytics.protocols :refer [init]]))
+                                                get-cached-trends]]
+            [tech-radar.analytics.protocols :refer [init
+                                                    texts
+                                                    search]]))
 
 (defn- get-settings []
   {:max-hashtags-per-trend (-> env
@@ -32,7 +33,7 @@
 
 (defrecord Analysis [database metrics preprocessor
                      stop-hashtags-update-fn stop-cache-update-fn
-                     get-trends-fn get-texts-fn]
+                     get-trends-fn get-texts-fn search-fn]
   component/Lifecycle
   (start [component]
     (if get-trends-fn
@@ -48,10 +49,12 @@
                                                          :max-hashtags-per-trend max-hashtags-per-trend
                                                          :max-texts-per-request  max-texts-per-request})
               cache                   (new-cache)
-              initial-data            (load-data database topics max-tweet-count)
+              initial-data            (load-data database {:topics                topics
+                                                           :max-texts-per-request max-texts-per-request
+                                                           :max-tweet-count       max-tweet-count})
               _                       (do
                                         (init model initial-data)
-                                        (cache-update-fn model cache topics)
+                                        (cache-update-fn model cache)
                                         (run-model-update {:model         model
                                                            :analysis-chan analysis-chan
                                                            :metrics       metrics}))
@@ -61,20 +64,21 @@
                                                             :metrics       metrics})
               stop-cache-update-fn    (run-cache-update {:model                  model
                                                          :cache                  cache
-                                                         :topics                 topics
                                                          :cache-update-timeout-s cache-update-timeout-s})]
           (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
                            :stop-cache-update-fn stop-cache-update-fn
                            :get-trends-fn (fn []
                                             (get-cached-trends cache))
                            :get-texts-fn (fn [topic]
-                                           (get-cached-texts cache topic)))))))
+                                           (texts model topic))
+                           :search-fn (fn [topic text]
+                                        (search model topic text)))))))
   (stop [component]
     (when stop-cache-update-fn
       (timbre/info "Stopping analysis")
       (stop-cache-update-fn)
       (stop-hashtags-update-fn)
-      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :get-trends-fn :get-texts-fn))))
+      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :get-trends-fn :get-texts-fn :search-fn))))
 
 (defn new-analysis []
   (map->Analysis {}))

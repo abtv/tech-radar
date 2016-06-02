@@ -1,7 +1,11 @@
 (ns tech-radar.analytics.model
   (:require [tech-radar.analytics.protocols :refer [Analyze
                                                     Storage
-                                                    Tweet]]))
+                                                    Tweet]]
+            [tech-radar.analytics.search :refer [new-search
+                                                 add-text
+                                                 remove-oldest-item
+                                                 search-texts]]))
 
 (defn- remove-old-tweets [tweets max-tweet-count]
   (let [tweet-count (count tweets)]
@@ -20,13 +24,6 @@
                    (let [values* (or values {})]
                      (reduce (fn [acc v]
                                (update-in acc [v] (fnil inc 0))) values* hashtags)))))))
-
-(defn- last-texts [texts max-count]
-  (let [count* (count texts)
-        start  (if (> count* max-count)
-                 (- count* max-count)
-                 0)]
-    (subvec texts start)))
 
 (defn- to-tweet-model [tweet]
   (select-keys tweet [:id :twitter-id :text :created-at :hashtags]))
@@ -52,17 +49,17 @@
                 [topic (get-top-hashtags max-hashtags-per-trend hashtags)]))
          (into {}))))
 
-(defn- get-last-texts [data topic settings]
-  (let [texts (or (get-in @data [(keyword topic) :texts])
-                  [])
-        {:keys [max-texts-per-request]} settings]
-    (->> (last-texts texts max-texts-per-request)
-         (map #(select-keys % [:id :twitter-id :text :created-at])))))
+(defn- add-tweets [search tweets]
+  (doseq [tweet tweets]
+    (add-text search tweet)))
 
-(defrecord Model [data settings topics]
+(defrecord Model [data search settings topics]
   Storage
   (init [this initial-data]
-    (reset! (:data this) initial-data)
+    (let [{:keys [data search]} this
+          {:keys [topics tweets]} initial-data]
+      (reset! data topics)
+      (add-tweets search tweets))
     nil)
   (reset-trends [this hashtags-type hashtags]
     (doseq [[topic hashtags] hashtags]
@@ -70,17 +67,26 @@
     nil)
   Tweet
   (add [this tweet]
-    (add* (:data this) tweet (-> this
-                                 (:settings)
-                                 (:max-tweet-count)))
+    (let [{:keys [data search]} this
+          {:keys [max-texts-per-request max-tweet-count]} (:settings this)]
+      (add* data tweet max-texts-per-request)
+      (add-text search tweet)
+      (let [texts-count (-> @search
+                            (:texts)
+                            (count))]
+        (when (> texts-count max-tweet-count)
+          (remove-oldest-item search))))
     nil)
   Analyze
+  (search [this topic text]
+    (search-texts (:search this) topic text))
   (trends [this]
     (let [{:keys [data settings]} this]
       (get-trends data settings)))
   (texts [this topic]
-    (let [{:keys [data settings]} this]
-      (get-last-texts data topic settings))))
+    (let [{:keys [data]} this]
+      (or (get-in @data [(keyword topic) :texts])
+          []))))
 
 (defn new-model [topics settings]
   (let [{:keys [max-tweet-count max-hashtags-per-trend max-texts-per-request]} settings]
@@ -92,5 +98,6 @@
       (throw (Exception. "you have to provide max-hashtags-per-trend param")))
 
     (map->Model {:data     (atom {})
+                 :search   (new-search)
                  :settings settings
                  :topics   topics})))

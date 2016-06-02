@@ -1,10 +1,11 @@
 (ns tech-radar.services.web
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [chan close! <! put!]]
-            [ajax.core :as clj-ajax]))
+            [ajax.core :as clj-ajax]
+            [cemerick.url :refer [url-encode]]))
 
-(def base-url "http://localhost:3000/")
-;(def base-url "http://178.62.237.72:3000/")
+;(def base-url "http://localhost:3000/")
+(def base-url "http://178.62.237.72:3000/")
 
 (defn ajax-request [method url & {:as params}]
   (let [url            (str base-url url)
@@ -34,3 +35,14 @@
           []
           (sort-by :created-at (fn [x y]
                                  (compare y x)) response)))))
+
+(defmethod web :search/get
+  [id {:keys [topic text] :as params}]
+  (go (let [url      (str "search/" topic)
+            response (<! (ajax-request :post url :params {:text text}))]
+        (if (:error response)
+          []
+          (let [{:keys [total texts]} response]
+            {:total total
+             :texts (sort-by :created-at (fn [x y]
+                                           (compare y x)) texts)})))))

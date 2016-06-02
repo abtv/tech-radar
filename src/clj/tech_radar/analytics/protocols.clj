@@ -1,6 +1,7 @@
 (ns tech-radar.analytics.protocols)
 
 (defprotocol Analyze
+  (search [this topic text])
   (trends [this])
   (texts [this topic]))
 
