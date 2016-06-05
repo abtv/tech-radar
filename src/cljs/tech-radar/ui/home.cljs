@@ -14,7 +14,7 @@
            [:h3 {} "Tech Radar helps you to be aware of modern trends in programming"]
            [:hr {}]
            [:h4 {} [:i.fa.fa-rocket {}] " Features"]
-           [:p {} "This is a resource created specifically for programmers."]
+           [:p {} "This is a resource created specially for programmers."]
            [:span {} "With Tech Radar you can:"]
            [:ul {}
             [:li {} "analyze job trends and see what's in high demand now"]
