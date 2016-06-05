@@ -33,18 +33,57 @@
     (doseq [topic topics*]
       (jdbc/insert! database :topics (topic->db topic) :entities to-underscores))))
 
-(defn- tweets-query [topic max-tweet-count]
+(defn- tweets-per-topic-query [topic max-records-count]
   (let [topic* (name topic)]
     (-> {:select   [:tweets.id :tweets.twitter-id :tweets.text :tweets.created-at]
          :from     [:tweets]
          :join     [:topics [:= :tweets.id :topics.tweet-id]]
          :where    [:= :topics.topic :?topic]
          :order-by [[:tweets.created-at :desc]]
-         :limit    max-tweet-count}
+         :limit    max-records-count}
         (format/format :params {:topic topic*}))))
 
-(defn load-tweets [database {:keys [topic max-tweet-count]}]
-  (let [tweets-query* (tweets-query topic max-tweet-count)]
+(defn load-tweets-per-topic [database {:keys [topic max-record-count]}]
+  (let [tweets-query* (tweets-per-topic-query topic max-record-count)]
     (->> (jdbc/query database tweets-query* :identifiers to-dashes)
          (reverse)
          (into []))))
+
+(defn- tweets-query [max-record-count]
+  (-> {:select   [:tweets.id :tweets.twitter-id :tweets.text :tweets.created-at :topics.topic]
+       :from     [:tweets]
+       :join     [:topics [:= :tweets.id :topics.tweet-id]]
+       :order-by [[:tweets.created-at :desc]]
+       :limit    max-record-count}
+      (format/format)))
+
+(defn- to-tweet [{:keys [id twitter-id text created-at topic]}]
+  (let [topic (keyword topic)]
+    {:id         id
+     :twitter-id twitter-id
+     :text       text
+     :created-at created-at
+     :topics     #{topic}}))
+
+(defn- join-to-tweets [xs]
+  (when xs
+    (loop [tweet  (-> (first xs)
+                      (to-tweet))
+           xs     (next xs)
+           tweets []]
+      (let [x (first xs)]
+        (cond
+          (nil? x) (conj tweets tweet)
+          (= (:id tweet) (:id x)) (recur (update-in tweet [:topics] conj (-> (:topic x)
+                                                                             (keyword)))
+                                         (next xs)
+                                         tweets)
+          :else (recur (to-tweet x)
+                       (next xs)
+                       (conj tweets tweet)))))))
+
+(defn load-tweets [database max-record-count]
+  (let [tweets-query* (tweets-query max-record-count)]
+    (->> (jdbc/query database tweets-query* :identifiers to-dashes)
+         (reverse)
+         (join-to-tweets))))

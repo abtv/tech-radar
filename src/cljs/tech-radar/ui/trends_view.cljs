@@ -1,7 +1,10 @@
 (ns tech-radar.ui.trends-view
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :refer-macros [html]]
-            [tech-radar.ui.loading-view :refer [loading-view]]))
+            [tech-radar.ui.loading-view :refer [loading-view]]
+            [tech-radar.state :refer [app-state]]
+            [tech-radar.history :refer [navigate-to-url!]]
+            [tech-radar.services.search :refer [make-search]]))
 
 (def max-chart-items 25)
 
@@ -9,6 +12,24 @@
   (->> data
        (sort-by :count (comp - compare))
        (take max-chart-items)))
+
+(defn- on-hashtag-click [topic]
+  (let [on-click (fn [e]
+                   (let [text (or (.-y e) e)]
+                     ;(navigate-to-url! (str "#" (name topic) "/search"))
+                     ;(navigate-to-url! (str "#" (name topic) "?text=" text))
+                     (make-search app-state topic text)))]
+    (.on (.selectAll js/d3 (str "#" (name topic) " rect")) "click" on-click)
+    (.on (.selectAll js/d3 (str "#" (name topic) " text")) "click" on-click)))
+
+(defn- set-hashtag-click []
+  (on-hashtag-click :jobs)
+  (on-hashtag-click :clojure)
+  (on-hashtag-click :jvm)
+  (on-hashtag-click :javascript)
+  (on-hashtag-click :golang)
+  (on-hashtag-click :linux)
+  (on-hashtag-click :nosql))
 
 (defn- draw-chart [data {:keys [id width height chart]}]
   (let [limit-data   (limit data)
@@ -19,6 +40,7 @@
         x            (.addMeasureAxis dimple-chart "x" x-axis)
         y            (.addCategoryAxis dimple-chart "y" y-axis)
         s            (.addSeries dimple-chart "" plot (clj->js [x y]))]
+    (set-hashtag-click)
     ;(.assignColor dimple-chart "lang-category" "yellow")
     (aset s "data" (clj->js limit-data))
     (.draw dimple-chart)

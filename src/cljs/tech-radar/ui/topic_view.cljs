@@ -99,11 +99,12 @@
           pages-count (if (= 0 (mod texts-count records-per-page))
                         pages-count
                         (inc pages-count))]
-      [:div.text-center {}
-       [:div {}
-        [:ul.pagination.no-borders {}
-         (->> (range 1 (inc pages-count))
-              (mapv (page-fn set-page-number page-number)))]]])))
+      (when (> pages-count 1)
+        [:div.text-center {}
+         [:div {}
+          [:ul.pagination.no-borders {}
+           (->> (range 1 (inc pages-count))
+                (mapv (page-fn set-page-number page-number)))]]]))))
 
 (defui TopicView
   static om/IQuery

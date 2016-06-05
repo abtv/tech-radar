@@ -26,9 +26,12 @@
                                           :linux
                                           :nosql}
                       :records-per-page 15
-                      :page-number      1}
+                      :page-number      1
+                      :search-text      nil
+                      :search-topic     nil}
      :current-screen :trends
      :current-topic  nil
      :trend-type     :daily
      :trends         {}
-     :topics         {}}))
+     :topics         {}
+     }))

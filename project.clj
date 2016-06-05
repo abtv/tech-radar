@@ -33,7 +33,10 @@
                  [figwheel-sidecar "0.5.0-6"]
                  [com.cemerick/piggieback "0.2.1"]
                  [secretary "1.2.3"]
-                 [cljsjs/dimple "2.1.2-0"]]
+                 [cljsjs/dimple "2.1.2-0"]
+                 [com.cemerick/url "0.1.1"]
+                 [ring/ring-json "0.4.0"]
+                 [ring-transit "0.1.4"]]
 
   :source-paths ["src/cljc" "src/clj" "src/cljs"]
 
@@ -72,8 +75,8 @@
                                      :cache-update-timeout-s "10"
                                      :max-hashtags-per-trend "25"
                                      :max-texts-per-request  "200"
-                                     :max-tweet-count        "1000"
-                                     :metrics-timeout-s      "30"
+                                     :max-tweet-count        "10000"
+                                     :metrics-timeout-s      "100"
                                      :log-path               "./logs/tech-radar.log"
                                      :max-log-size-mb        "1"
                                      :backlog                "2"}}
@@ -90,7 +93,7 @@
                                      :cache-update-timeout-s "30"
                                      :max-hashtags-per-trend "25"
                                      :max-texts-per-request  "200"
-                                     :max-tweet-count        "1000"
+                                     :max-tweet-count        "10000"
                                      :metrics-timeout-s      "300"
                                      :log-path               "./logs/tech-radar.log"
                                      :max-log-size-mb        "1"
