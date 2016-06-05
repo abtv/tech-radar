@@ -35,7 +35,7 @@
                                    :max-texts-per-request  200})
         created-at (now)
         topic-item (fn [tweet]
-                     (select-keys tweet [:id :text :created-at]))
+                     (select-keys tweet [:id :text :created-at :twitter-id]))
         t1         {:id         1
                     :text       "React in Clojure under Linux #react #ubuntu"
                     :created-at created-at

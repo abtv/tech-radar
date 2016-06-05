@@ -26,7 +26,7 @@
                                (update-in acc [v] (fnil inc 0))) values* hashtags)))))))
 
 (defn- to-tweet-model [tweet]
-  (select-keys tweet [:id :text :created-at]))
+  (select-keys tweet [:id :text :created-at :twitter-id]))
 
 (defn- add* [data tweet max-tweet-count]
   (swap! data (fn [data {:keys [topics hashtags] :as tweet}]
