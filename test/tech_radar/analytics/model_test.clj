@@ -17,8 +17,9 @@
                :created-at (now)
                :hashtags   []
                :topics     []}]
-    (init model {:nosql {:texts    []
-                         :hashtags {}}})
+    (init model {:topics {:nosql {:texts    []
+                                  :hashtags {}}}
+                 :tweets []})
     (add model t1)
     (let [trends*       (trends model)
           unknown-topic (texts model :unknown)
@@ -32,28 +33,33 @@
   (let [model      (new-model nil {:max-tweet-count        1000
                                    :max-hashtags-per-trend 25
                                    :max-texts-per-request  200})
+        created-at (now)
         topic-item (fn [tweet]
                      (select-keys tweet [:id :text :created-at]))
         t1         {:id         1
                     :text       "React in Clojure under Linux #react #ubuntu"
-                    :created-at (now)
+                    :created-at created-at
+                    :twitter-id 10
                     :hashtags   ["react" "ubuntu"]
                     :topics     [:clojure :linux]}
         t2         {:id         2
                     :text       "React in JavaScript #react"
-                    :created-at (now)
+                    :created-at created-at
+                    :twitter-id 20
                     :hashtags   ["react"]
                     :topics     [:javascript]}
         t3         {:id         3
                     :text       "React in ClojureScript #react"
-                    :created-at (now)
+                    :created-at created-at
+                    :twitter-id 30
                     :hashtags   ["react"]
                     :topics     [:clojure]}
         e1         (topic-item t1)
         e2         (topic-item t2)
         e3         (topic-item t3)]
-    (init model {:nosql {:texts    []
-                         :hashtags {}}})
+    (init model {:topics {:nosql {:texts    []
+                                  :hashtags {}}}
+                 :tweets []})
     (add model t1)
     (add model t2)
     (add model t3)
@@ -73,6 +79,19 @@
       (is (= [e2] javascript-topic))
       (is (= [e1] linux-topic))
       (is (= [] nosql)))
-    (is (= [{:id 2 :text "React in JavaScript #react"}] (search model :javascript "#react")))
-    (is (= [] (search model :no-topic "#react")))
-    (is (= [{:id 1 :text "React in Clojure under Linux #react #ubuntu"} {:id 3 :text "React in ClojureScript #react"}] (search model :clojure "#react")))))
+    (is (= {:total 1
+            :texts [{:id         2
+                     :text       "React in JavaScript #react"
+                     :created-at created-at
+                     :twitter-id 20}]} (search model :javascript "#react")))
+    (is (= {:total 0
+            :texts []} (search model :no-topic "#react")))
+    (is (= {:total 2
+            :texts [{:id         1
+                     :text       "React in Clojure under Linux #react #ubuntu"
+                     :created-at created-at
+                     :twitter-id 10}
+                    {:id         3
+                     :text       "React in ClojureScript #react"
+                     :created-at created-at
+                     :twitter-id 30}]} (search model :clojure "#react")))))
