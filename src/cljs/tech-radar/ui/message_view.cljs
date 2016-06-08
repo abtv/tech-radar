@@ -1,8 +1,8 @@
-(ns tech-radar.ui.loading-view
+(ns tech-radar.ui.message-view
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :refer-macros [html]]))
 
-(defui LoadingView
+(defui MessageView
   Object
   (render [this]
     (let [{:keys [text]} (om/props this)]
@@ -10,4 +10,4 @@
         [:div {}
          [:p {:class "lead"} text]]))))
 
-(def loading-view (om/factory LoadingView))
+(def message-view (om/factory MessageView))

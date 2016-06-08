@@ -1,6 +1,9 @@
 (ns tech-radar.ui.navbar
   (:require [om.next :as om :refer-macros [defui]]
-            [sablono.core :refer-macros [html]]))
+            [sablono.core :refer-macros [html]]
+            [tech-radar.utils.view :refer [prevent-propagation]]
+            [tech-radar.state :refer [app-state]]
+            [tech-radar.services.search :refer [make-search]]))
 
 (defn brand-toggle []
   (html
@@ -44,14 +47,19 @@
     (mapv (fn [[id params]]
             (menu-item (assoc params :selected (= id current-topic)))) topic-items)]])
 
-(defn search-input [search-text]
+(defn search-input [topic search-text]
   [:form.navbar-form.navbar-right {}
    [:div.input-group {}
     [:input.form-control {:type        "text"
                           :placeholder "Search..."
-                          :value       (or search-text "")}]
+                          :value       (or search-text "")
+                          :on-change   (fn [e]
+                                         (let [value (-> e .-target .-value)]
+                                           (swap! app-state assoc-in [:settings :search-text] value)))}]
     [:span.input-group-btn {}
-     [:button.btn.btn-default {}
+     [:button.btn.btn-default {:on-click (fn [e]
+                                           (make-search app-state topic search-text)
+                                           (prevent-propagation e))}
       [:i.fa.fa-search {} ""]]]]])
 
 (defui NavBar
@@ -70,7 +78,7 @@
           {:keys [current-screen current-topic]} (om/get-computed this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
-             #_(search-input search-text)
+             (search-input current-topic search-text)
              (when (= :topic current-screen)
                (records-per-page-settings records-per-page #(.set-record-count this %)))
              (sidebar-menu-items menu-items current-topic)]))))

@@ -1,7 +1,7 @@
 (ns tech-radar.ui.home
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :refer-macros [html]]
-            [tech-radar.ui.loading-view :refer [loading-view]]))
+            [tech-radar.ui.message-view :refer [message-view]]))
 
 (defui Home
   Object

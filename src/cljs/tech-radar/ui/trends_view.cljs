@@ -1,7 +1,7 @@
 (ns tech-radar.ui.trends-view
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :refer-macros [html]]
-            [tech-radar.ui.loading-view :refer [loading-view]]
+            [tech-radar.ui.message-view :refer [message-view]]
             [tech-radar.state :refer [app-state]]
             [tech-radar.history :refer [navigate-to-url!]]
             [tech-radar.services.search :refer [make-search]]))
@@ -18,7 +18,7 @@
                    (let [text (or (.-y e) e)]
                      ;(navigate-to-url! (str "#" (name topic) "/search"))
                      ;(navigate-to-url! (str "#" (name topic) "?text=" text))
-                     (make-search app-state topic text)))]
+                     (make-search app-state topic (str "#" text))))]
     (.on (.selectAll js/d3 (str "#" (name topic) " rect")) "click" on-click)
     (.on (.selectAll js/d3 (str "#" (name topic) " text")) "click" on-click)))
 
@@ -168,6 +168,6 @@
                  (trend-item :weekly trend-type set-trend-type)
                  (trend-item :monthly trend-type set-trend-type)]]]]]
             (charts-view (om/computed props {:trend-type trend-type}))]
-           (loading-view {:text "Loading trends, please wait."}))]))))
+           (message-view {:text "Loading trends, please wait."}))]))))
 
 (def trends-view (om/factory TrendsView))

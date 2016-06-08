@@ -3,7 +3,7 @@
             [sablono.core :refer-macros [html]]
             [tech-radar.state :refer [app-state]]
             [tech-radar.utils.text-formatter :refer [format]]
-            [tech-radar.ui.loading-view :refer [loading-view]]))
+            [tech-radar.ui.message-view :refer [message-view]]))
 
 (defn- format-time-number [n]
   (if (< n 10)
@@ -132,11 +132,13 @@
                          :records-per-page records-per-page
                          :page-number      page-number
                          :set-page-number  set-page-number})
-           (if (seq texts)
-             (table-view (om/computed {} {:texts            texts
-                                          :records-per-page records-per-page
-                                          :page-number      page-number}))
-             (loading-view {:text "Loading texts, please wait."}))]]]))))
+           (if texts
+             (if (seq texts)
+               (table-view (om/computed {} {:texts            texts
+                                            :records-per-page records-per-page
+                                            :page-number      page-number}))
+               (message-view {:text "No records found for your request."}))
+             (message-view {:text "Loading texts, please wait."}))]]]))))
 
 (def topic-view (om/factory TopicView))
 
