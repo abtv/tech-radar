@@ -14,13 +14,21 @@
        (take max-chart-items)))
 
 (defn- on-hashtag-click [topic]
-  (let [on-click (fn [e]
-                   (let [text (or (.-y e) e)]
-                     ;(navigate-to-url! (str "#" (name topic) "/search"))
-                     ;(navigate-to-url! (str "#" (name topic) "?text=" text))
-                     (make-search app-state topic (str "#" text))))]
-    (.on (.selectAll js/d3 (str "#" (name topic) " rect")) "click" on-click)
-    (.on (.selectAll js/d3 (str "#" (name topic) " text")) "click" on-click)))
+  (let [all-rects (.selectAll js/d3 (str "#" (name topic) " rect"))
+        all-texts (.selectAll js/d3 (str "#" (name topic) " text"))
+        on-click  (fn [e]
+                    (let [text (or (.-y e) e)]
+                      (make-search app-state topic (str "#" text))))
+        cursor-fn (fn [cursor]
+                    (fn [_]
+                      (this-as this
+                        (.style (.select js/d3 this) "cursor" cursor))))]
+    (.on all-rects "click" on-click)
+    (.on all-texts "click" on-click)
+    (.on all-rects "mouseover" (cursor-fn "pointer"))
+    (.on all-rects "mouseout" (cursor-fn "default"))
+    (.on all-texts "mouseover" (cursor-fn "pointer"))
+    (.on all-texts "mouseout" (cursor-fn "default"))))
 
 (defn- set-hashtag-click []
   (on-hashtag-click :jobs)
