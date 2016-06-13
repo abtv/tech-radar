@@ -78,7 +78,8 @@
           {:keys [current-screen current-topic]} (om/get-computed this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
-             (search-input current-topic search-text)
+             (when (= :topic current-screen)
+               (search-input current-topic search-text))
              (when (= :topic current-screen)
                (records-per-page-settings records-per-page #(.set-record-count this %)))
              (sidebar-menu-items menu-items current-topic)]))))

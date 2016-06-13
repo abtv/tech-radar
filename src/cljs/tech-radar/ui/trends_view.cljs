@@ -6,7 +6,7 @@
             [tech-radar.history :refer [navigate-to-url!]]
             [tech-radar.services.search :refer [make-search]]))
 
-(def max-chart-items 25)
+(def max-chart-items 20)
 
 (defn- limit [data]
   (->> data
