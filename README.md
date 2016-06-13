@@ -47,6 +47,7 @@ Build with `build-release-all.sh` script
 3. copy `backend-release` folder to your server
 
 Instead of #3 I use the following
+
 1. set `SCPTECHRADAR` variable to your `username@address:path-to-copy-zip-archive`
 2. run `build-and-upload.sh` script (it builds the app and uploads backend and frontend)
 
