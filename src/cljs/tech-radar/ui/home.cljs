@@ -26,9 +26,10 @@
                    a convenient way for you to broad your knowledge horizonts."]
            [:hr {}]
            [:h4 {} [:i.fa.fa-info-circle {}] " How to use Tech Radar"]
-           [:p {} "Use " [:a {:href "#/trends"} "Trends"] " menu item to see hashtag analytics. Use "
-            [:a {:href "#/topic/jobs"} "Jobs"] " menu item to see latest job tweets or one of the languge menu items to see
-                  latest language trends."]
+           [:p {} "Use " [:a {:href "#/trends"} "Trends"] " menu item to see hashtag analytics. You can click any hashtag on a diagram
+                   and you will see tweets with the hashtag. Use " [:a {:href "#/topic/jobs"} "Jobs"]
+                  " menu item to see latest job tweets or one of the languge menu items to see latest language trends. You can
+                   also find interesting tweets with \"Search\" window."]
            [:hr {}]
            [:div {}
             [:h4 {} [:i.fa.fa-code-fork {}] " How to contribute"]
