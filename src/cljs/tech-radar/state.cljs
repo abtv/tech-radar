@@ -31,6 +31,7 @@
      :current-screen :trends
      :current-topic  nil
      :trend-type     :daily
+     :current-trend  :jobs
      :trends         {}
      :topics         {}
      }))

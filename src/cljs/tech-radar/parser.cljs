@@ -37,6 +37,10 @@
   (let [{:keys [trend-type]} params]
     {:action (swap! state assoc-in [:trend-type] trend-type)}))
 
+(defmethod mutate 'current-trend/set [{:keys [state] :as env} key params]
+  (let [{:keys [current-trend]} params]
+    {:action (swap! state assoc-in [:current-trend] current-trend)}))
+
 (defmethod mutate :default [{:keys [state] :as env} key params]
   (js/console.log "mutate not found")
   {:value :not-found})

@@ -6,7 +6,7 @@
             [tech-radar.history :refer [navigate-to-url!]]
             [tech-radar.services.search :refer [make-search]]))
 
-(def max-chart-items 20)
+(def max-chart-items 30)
 
 (defn- limit [data]
   (->> data
@@ -48,12 +48,11 @@
         x            (.addMeasureAxis dimple-chart "x" x-axis)
         y            (.addCategoryAxis dimple-chart "y" y-axis)
         s            (.addSeries dimple-chart "" plot (clj->js [x y]))]
-    (set-hashtag-click)
-    ;(.assignColor dimple-chart "lang-category" "yellow")
     (aset s "data" (clj->js limit-data))
     (.draw dimple-chart)
     (.text (.-titleShape x) name)
-    (.text (.-titleShape y) "")))
+    (.text (.-titleShape y) "")
+    (set-hashtag-click)))
 
 (defn- new-chart-params [{:keys [id name width height]}]
   {:id     id
@@ -72,7 +71,7 @@
   (let [e            (.getElementById js/document id)
         x            (.-clientWidth e)
         width-offset 30
-        height       400]
+        height       640]
     {:width (- x width-offset) :height height}))
 
 (defui Chart
@@ -107,37 +106,30 @@
 
 (def chart (om/factory Chart))
 
-(defui ChartsView
+(defui ChartView
   static om/IQuery
   (query [this]
     [{:settings [:menu-items :topic-items]} :trends :current-topic])
   Object
   (render [this]
-    (let [{{menu-items  :menu-items
-            topic-items :topic-items} :settings
-           trends                     :trends} (om/props this)
-          {:keys [trend-type]} (om/get-computed this)]
+    (let [{{menu-items :menu-items} :settings
+           trends                   :trends} (om/props this)
+          {:keys [trend-type current-trend]} (om/get-computed this)]
       (html
-        [:div {:id "charts-view"}
-         (->> menu-items
-              (filter (fn [[k _]]
-                        (topic-items k)))
-              (partition-all 2)
-              (map-indexed (fn [idx items]
-                             [:div.row {:key (str "radar_" idx)}
-                              (->> items
-                                   (map (fn [[id {:keys [name]}]]
-                                          (let [parent-id (str "chart-div-" (cljs.core/name name))]
-                                            [:div.col-lg-6 {:id parent-id}
-                                             (when-let [data (-> trends
-                                                                 (id)
-                                                                 (trend-type))]
-                                               (chart {:id        (cljs.core/name id)
-                                                       :name      name
-                                                       :data      data
-                                                       :parent-id parent-id}))]))))])))]))))
+        [:div
+         (let [parent-id "chart-container"
+               {:keys [name]} (current-trend menu-items)]
+           [:div.row {}
+            [:div.col-lg-12 {:id parent-id}
+             (when-let [data (-> trends
+                                 (current-trend)
+                                 (trend-type))]
+               (chart {:id        (cljs.core/name current-trend)
+                       :name      name
+                       :data      data
+                       :parent-id parent-id}))]])]))))
 
-(def charts-view (om/factory ChartsView))
+(def chart-view (om/factory ChartView))
 
 (defn- trend-type->name [type]
   (case type
@@ -152,30 +144,52 @@
                       "active cursor"
                       "cursor")
           :on-click #(set-trend-type trend-type)}
-     [:a
-      name]]))
+     [:a name]]))
+
+(defn- trend-item->name [trend]
+  (case trend
+    :jobs "Jobs"
+    :clojure "Clojure"
+    :jvm "JVM"
+    :javascript "JavaScript"
+    :golang "Golang"
+    :linux "Linux"
+    :nosql "NoSQL"))
+
+(defn topic-item [trend current-trend set-current-trend]
+  (let [name (trend-item->name trend)]
+    [:li {:key      (str "topic-item-" name)
+          :class    (if (= trend current-trend)
+                      "active cursor"
+                      "cursor")
+          :on-click #(set-current-trend trend)}
+     [:a name]]))
 
 (defui TrendsView
   static om/IQuery
   (query [this]
-    (conj (om/get-query ChartsView) :trend-type))
+    (conj (om/get-query ChartView) :trend-type :current-trend))
   Object
   (render [this]
     (html
-      (let [{:keys [trends trend-type] :as props} (om/props this)
-            {:keys [set-trend-type]} (om/get-computed this)]
+      (let [{:keys [trends trend-type current-trend] :as props} (om/props this)
+            {:keys [set-trend-type set-current-trend]} (om/get-computed this)]
         [:div.container-fluid
          (if (seq trends)
            [:div
             [:div.row
-             [:div.col-lg-12
+             [:div.col-lg-6
               [:div.text-center {}
-               [:div {}
-                [:ul.pagination.no-borders {}
-                 (trend-item :daily trend-type set-trend-type)
-                 (trend-item :weekly trend-type set-trend-type)
-                 (trend-item :monthly trend-type set-trend-type)]]]]]
-            (charts-view (om/computed props {:trend-type trend-type}))]
+               [:ul.pagination.no-borders {}
+                (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
+                     (mapv #(topic-item % current-trend set-current-trend)))]]]
+             [:div.col-lg-6
+              [:div.text-center {}
+               [:ul.pagination.no-borders {}
+                (->> [:daily :weekly :monthly]
+                     (mapv #(trend-item % trend-type set-trend-type)))]]]]
+            (chart-view (om/computed props {:trend-type    trend-type
+                                            :current-trend current-trend}))]
            (message-view {:text "Loading trends, please wait."}))]))))
 
 (def trends-view (om/factory TrendsView))

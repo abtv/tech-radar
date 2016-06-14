@@ -24,6 +24,8 @@
     (om/transact! this `[(page-number/set {:page-number ~cnt}) [:settings]]))
   (set-trend-type [this trend-type]
     (om/transact! this `[(trend-type/set {:trend-type ~trend-type}) [:settings]]))
+  (set-current-trend [this current-trend]
+    (om/transact! this `[(current-trend/set {:current-trend ~current-trend}) [:settings]]))
 
   (render [this]
     (let [{:keys [settings current-screen current-topic state]} (om/props this)]
@@ -35,10 +37,8 @@
          [:div#page-wrapper {}
           (condp = current-screen
             :home (home state)
-            :trends (trends-view (om/computed state
-                                              {:set-trend-type
-                                               (fn [trend-type]
-                                                 (.set-trend-type this trend-type))}))
+            :trends (trends-view (om/computed state {:set-trend-type #(.set-trend-type this %)
+                                                     :set-current-trend #(.set-current-trend this %)}))
             (topic-view (om/computed state
                                      {:set-page-number
                                       (fn [page-number]
