@@ -14,21 +14,25 @@
        (take max-chart-items)))
 
 (defn- on-hashtag-click [topic]
-  (let [all-rects (.selectAll js/d3 (str "#" (name topic) " rect"))
-        all-texts (.selectAll js/d3 (str "#" (name topic) " text"))
-        on-click  (fn [e]
-                    (let [text (or (.-y e) e)]
-                      (make-search app-state topic (str "#" text))))
-        cursor-fn (fn [cursor]
-                    (fn [_]
-                      (this-as this
-                        (.style (.select js/d3 this) "cursor" cursor))))]
+  (let [all-rects    (.selectAll js/d3 (str "#" (name topic) " rect"))
+        all-texts    (.selectAll js/d3 (str "#" (name topic) " text"))
+        on-click     (fn [e]
+                       (let [text (or (.-y e) e)]
+                         (make-search app-state topic (str "#" text))))
+        set-style-fn (fn [cursor color]
+                       (fn [_]
+                         (this-as this
+                           (let [obj (.select js/d3 this)]
+                             (.style obj "cursor" cursor)
+                             (.style obj "fill" color)))))]
     (.on all-rects "click" on-click)
     (.on all-texts "click" on-click)
-    (.on all-rects "mouseover" (cursor-fn "pointer"))
-    (.on all-rects "mouseout" (cursor-fn "default"))
-    (.on all-texts "mouseover" (cursor-fn "pointer"))
-    (.on all-texts "mouseout" (cursor-fn "default"))))
+
+    (.on all-rects "mouseover" (set-style-fn "pointer" "red"))
+    (.on all-rects "mouseout" (set-style-fn "default" "80B1D3"))
+
+    (.on all-texts "mouseover" (set-style-fn "pointer" "red"))
+    (.on all-texts "mouseout" (set-style-fn "default" "black"))))
 
 (defn- set-hashtag-click []
   (on-hashtag-click :jobs)
