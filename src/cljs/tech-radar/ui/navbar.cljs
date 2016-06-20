@@ -47,7 +47,7 @@
     (mapv (fn [[id params]]
             (menu-item (assoc params :selected (= id current-topic)))) topic-items)]])
 
-(defn search-input [topic search-text]
+(defn search-input [navbar-component topic search-text]
   [:form.navbar-form.navbar-right {}
    [:div.input-group {}
     [:input.form-control {:type        "text"
@@ -55,7 +55,8 @@
                           :value       (or search-text "")
                           :on-change   (fn [e]
                                          (let [value (-> e .-target .-value)]
-                                           (swap! app-state assoc-in [:settings :search-text] value)))}]
+                                           (om/transact! navbar-component `[(search-text/set {:search-text ~value})
+                                                                            {:settings [:search-text]}])))}]
     [:span.input-group-btn {}
      [:button.btn.btn-default {:on-click (fn [e]
                                            (make-search app-state topic search-text)
@@ -79,7 +80,7 @@
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
              (brand-toggle)
              (when (= :topic current-screen)
-               (search-input current-topic search-text))
+               (search-input this current-topic search-text))
              (when (= :topic current-screen)
                (records-per-page-settings records-per-page #(.set-record-count this %)))
              (sidebar-menu-items menu-items current-topic)]))))

@@ -41,6 +41,10 @@
   (let [{:keys [current-trend]} params]
     {:action (swap! state assoc-in [:current-trend] current-trend)}))
 
+(defmethod mutate 'search-text/set [{:keys [state] :as env} key params]
+  (let [{:keys [search-text]} params]
+    {:action (swap! state assoc-in [:settings :search-text] search-text)}))
+
 (defmethod mutate :default [{:keys [state] :as env} key params]
   (js/console.log "mutate not found")
   {:value :not-found})
