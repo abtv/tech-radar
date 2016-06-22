@@ -21,7 +21,7 @@
         minutes (-> (.getMinutes t)
                     (format-time-number))]
     (if (today? t now)
-      (str "today " hours ":" minutes)
+      (str hours ":" minutes)
       (let [year  (.getFullYear t)
             month (-> (.getMonth t)
                       (inc)
