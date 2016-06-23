@@ -6,13 +6,6 @@
             [tech-radar.history :refer [navigate-to-url!]]
             [tech-radar.services.search :refer [make-search]]))
 
-(def max-chart-items 30)
-
-(defn- limit [data]
-  (->> data
-       (sort-by :count (comp - compare))
-       (take max-chart-items)))
-
 (defn- on-hashtag-click [topic]
   (let [all-rects    (.selectAll js/d3 (str "#" (name topic) " rect"))
         all-texts    (.selectAll js/d3 (str "#" (name topic) " text"))
@@ -44,15 +37,14 @@
   (on-hashtag-click :nosql))
 
 (defn- draw-chart [data {:keys [id width height chart]}]
-  (let [limit-data   (limit data)
-        {:keys [bounds margins plot x-axis y-axis name]} chart
+  (let [{:keys [bounds margins plot x-axis y-axis name]} chart
         Chart        (.-chart js/dimple)
         svg          (.newSvg js/dimple (str "#" id) width height)
         dimple-chart (.setMargins (Chart. svg) (:left margins) (:top margins) (:right margins) (:bottom margins))
         x            (.addMeasureAxis dimple-chart "x" x-axis)
         y            (.addCategoryAxis dimple-chart "y" y-axis)
         s            (.addSeries dimple-chart "" plot (clj->js [x y]))]
-    (aset s "data" (clj->js limit-data))
+    (aset s "data" (clj->js data))
     (.draw dimple-chart)
     (.text (.-titleShape x) name)
     (.text (.-titleShape y) "")

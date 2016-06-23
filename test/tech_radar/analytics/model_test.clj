@@ -9,9 +9,10 @@
                                                     search]]))
 
 (deftest empty-test
-  (let [model (new-model nil {:max-tweet-count        1000
-                              :max-hashtags-per-trend 25
-                              :max-texts-per-request  200})
+  (let [model (new-model nil {:max-tweet-count         1000
+                              :max-hashtags-per-trend  25
+                              :max-texts-per-request   200
+                              :hashtag-filter-settings {}})
         t1    {:id         1
                :text       "just a plain text"
                :created-at (now)
@@ -30,17 +31,20 @@
       (is (= [] nosql)))))
 
 (deftest add-test
-  (let [model      (new-model nil {:max-tweet-count        1000
-                                   :max-hashtags-per-trend 25
-                                   :max-texts-per-request  200})
+  (let [model      (new-model nil {:max-tweet-count         1000
+                                   :max-hashtags-per-trend  25
+                                   :max-texts-per-request   200
+                                   :hashtag-filter-settings {:clojure #{"stop-word" "Another-word"}
+                                                             :linux   #{"stop-word" "Another-Word"}}})
+        _ (prn model)
         created-at (now)
         topic-item (fn [tweet]
                      (select-keys tweet [:id :text :created-at :twitter-id]))
         t1         {:id         1
-                    :text       "React in Clojure under Linux #react #ubuntu"
+                    :text       "React in Clojure under Linux #react #ubuntu with #Stop-word and #another-word"
                     :created-at created-at
                     :twitter-id 10
-                    :hashtags   ["react" "ubuntu"]
+                    :hashtags   ["react" "Ubuntu" "ubuntu" "Stop-word" "another-word"]
                     :topics     [:clojure :linux]}
         t2         {:id         2
                     :text       "React in JavaScript #react"
@@ -69,9 +73,9 @@
           linux-topic      (texts model :linux)
           nosql            (texts model :nosql)]
       (is (= {:clojure    {:daily {"react"  2
-                                   "ubuntu" 1}}
+                                   "ubuntu" 2}}
               :linux      {:daily {"react"  1
-                                   "ubuntu" 1}}
+                                   "ubuntu" 2}}
               :javascript {:daily {"react" 1}}
               :nosql      {}}
              trends*))
@@ -88,7 +92,7 @@
             :texts []} (search model :no-topic "#react")))
     (is (= {:total 2
             :texts [{:id         1
-                     :text       "React in Clojure under Linux #react #ubuntu"
+                     :text       "React in Clojure under Linux #react #ubuntu with #Stop-word and #another-word"
                      :created-at created-at
                      :twitter-id 10}
                     {:id         3

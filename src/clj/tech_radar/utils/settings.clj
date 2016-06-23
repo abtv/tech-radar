@@ -15,3 +15,6 @@
 
 (defn load-classify-settings []
   (load-parameter :classify-settings))
+
+(defn load-hashtag-filter-settings []
+  (load-parameter :hashtag-filter-settings))

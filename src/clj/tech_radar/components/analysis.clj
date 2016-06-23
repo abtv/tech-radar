@@ -9,7 +9,8 @@
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [tech-radar.utils.parsers :refer [parse-int]]
-            [tech-radar.utils.settings :refer [load-classify-settings]]
+            [tech-radar.utils.settings :refer [load-classify-settings
+                                               load-hashtag-filter-settings]]
             [tech-radar.analytics.model :refer [new-model]]
             [tech-radar.analytics.cache :refer [new-cache
                                                 get-cached-trends]]
@@ -41,27 +42,31 @@
       (do
         (timbre/info "Initializing analysis")
         (let [{:keys [topics]} (load-classify-settings)
+              hashtag-filter-settings (load-hashtag-filter-settings)
               {:keys [max-hashtags-per-trend max-texts-per-request max-tweet-count cache-update-timeout-s]} (get-settings)
               topics                  (map first topics)
               database                (:database database)
               analysis-chan           (:analysis-chan preprocessor)
-              model                   (new-model topics {:max-tweet-count        max-tweet-count
-                                                         :max-hashtags-per-trend max-hashtags-per-trend
-                                                         :max-texts-per-request  max-texts-per-request})
+              model                   (new-model topics {:max-tweet-count         max-tweet-count
+                                                         :max-hashtags-per-trend  max-hashtags-per-trend
+                                                         :max-texts-per-request   max-texts-per-request
+                                                         :hashtag-filter-settings hashtag-filter-settings})
               cache                   (new-cache)
-              initial-data            (load-data database {:topics                topics
-                                                           :max-texts-per-request max-texts-per-request
-                                                           :max-tweet-count       max-tweet-count})
+              initial-data            (load-data database {:topics                  topics
+                                                           :max-texts-per-request   max-texts-per-request
+                                                           :max-tweet-count         max-tweet-count
+                                                           :hashtag-filter-settings hashtag-filter-settings})
               _                       (do
                                         (init model initial-data)
                                         (cache-update-fn model cache)
                                         (run-model-update {:model         model
                                                            :analysis-chan analysis-chan
                                                            :metrics       metrics}))
-              stop-hashtags-update-fn (run-hashtags-update {:database      database
-                                                            :topics        topics
-                                                            :analysis-chan analysis-chan
-                                                            :metrics       metrics})
+              stop-hashtags-update-fn (run-hashtags-update {:database                database
+                                                            :topics                  topics
+                                                            :hashtag-filter-settings hashtag-filter-settings
+                                                            :analysis-chan           analysis-chan
+                                                            :metrics                 metrics})
               stop-cache-update-fn    (run-cache-update {:model                  model
                                                          :cache                  cache
                                                          :cache-update-timeout-s cache-update-timeout-s})]

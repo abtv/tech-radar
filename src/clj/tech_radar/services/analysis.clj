@@ -18,46 +18,49 @@
             [clj-time.local :as local]
             [clj-time.core :as time]))
 
-(defn- load-topic [database {:keys [topic max-record-count]}]
+(defn- load-topic [database {:keys [topic max-record-count hashtag-filter]}]
   (let [tweets  (load-tweets-per-topic database {:topic            topic
                                                  :max-record-count max-record-count})
-        daily   (load-daily-hashtags database topic)
-        weekly  (load-weekly-hashtags database topic)
-        monthly (load-monthly-hashtags database topic)]
+        daily   (load-daily-hashtags database topic hashtag-filter)
+        weekly  (load-weekly-hashtags database topic hashtag-filter)
+        monthly (load-monthly-hashtags database topic hashtag-filter)]
     {:texts    tweets
      :hashtags {:daily   daily
                 :weekly  weekly
                 :monthly monthly}}))
 
-(defn load-data [database {:keys [topics max-texts-per-request max-tweet-count]}]
+(defn load-data [database {:keys [topics max-texts-per-request max-tweet-count hashtag-filter-settings]}]
   (when-not max-tweet-count
     (throw (Exception. "you have to provide max-tweet-count param")))
   (when-not max-texts-per-request
     (throw (Exception. "you have to provide max-texts-per-request param")))
   {:topics (reduce (fn [data topic]
                      (->> (load-topic database {:topic            topic
-                                                :max-record-count max-texts-per-request})
+                                                :max-record-count max-texts-per-request
+                                                :hashtag-filter   (topic hashtag-filter-settings)})
                           (assoc data topic))) {} topics)
    :tweets (load-tweets database max-tweet-count)})
 
-(defmulti load-hashtags (fn [type database topic]
+(defmulti load-hashtags (fn [type {:keys [database topic hashtag-filter]}]
                           type))
 
-(defmethod load-hashtags :daily [_ database topic]
-  (load-daily-hashtags database topic))
+(defmethod load-hashtags :daily [_ {:keys [database topic hashtag-filter]}]
+  (load-daily-hashtags database topic hashtag-filter))
 
-(defmethod load-hashtags :weekly [_ database topic]
-  (load-weekly-hashtags database topic))
+(defmethod load-hashtags :weekly [_ {:keys [database topic hashtag-filter]}]
+  (load-weekly-hashtags database topic hashtag-filter))
 
-(defmethod load-hashtags :monthly [_ database topic]
-  (load-monthly-hashtags database topic))
+(defmethod load-hashtags :monthly [_ {:keys [database topic hashtag-filter]}]
+  (load-monthly-hashtags database topic hashtag-filter))
 
-(defn- reload-hashtags [type database topics]
+(defn- reload-hashtags [database {:keys [hashtag-type topics hashtag-filter-settings]}]
   (map (fn [topic]
-         [topic (load-hashtags type database topic)])
+         [topic (load-hashtags hashtag-type {:database       database
+                                             :topic          topic
+                                             :hashtag-filter (topic hashtag-filter-settings)})])
        topics))
 
-(defn run-hashtags-update [{:keys [database topics analysis-chan metrics]}]
+(defn run-hashtags-update [{:keys [database topics hashtag-filter-settings analysis-chan metrics]}]
   (let [stop-chan   (chan)
         last-update (atom {:daily   (local/local-now)
                            :weekly  (local/local-now)
@@ -70,7 +73,9 @@
                       (increment metrics :analysis-chan)
                       (>!! analysis-chan {:type         :hashtags-update
                                           :hashtag-type hashtag-type
-                                          :hashtags     (reload-hashtags hashtag-type database topics)})
+                                          :hashtags     (reload-hashtags database {:hashtag-type            hashtag-type
+                                                                                   :topics                  topics
+                                                                                   :hashtag-filter-settings hashtag-filter-settings})})
                       (swap! last-update assoc-in [hashtag-type] (local/local-now)))
         process     (thread
                       (loop []

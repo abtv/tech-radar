@@ -1,0 +1,8 @@
+{:clojure    #{"clojure" "clojurescript"}
+ :jvm        #{"jvm" "java" "scala"}
+ :javascript #{"javascript" "js" "makeatwitterbot" "fakeheadlinebot" "learntocode"}
+ :golang     #{"golang" "go"}
+ :linux      #{"linux" "fat"}
+ :nosql      #{"nosql"}
+ :rust       #{"rust"}
+ :jobs       #{"job" "jobs" "hiring"}}
