@@ -75,8 +75,9 @@
   (componentDidMount [this]
     (let [{:keys [data parent-id] :as props} (om/props this)
           params (new-chart-params props)
-          size   (get-chart-size parent-id)]
-      (om/set-state! this size)
+          size   (get-chart-size parent-id)
+          state  (om/get-state this)]
+      (om/set-state! this (assoc state :size size))
       (draw-chart data (merge params size))))
   (componentDidUpdate [this _ _]
     (let [{:keys [id parent-id data] :as props} (om/props this)
@@ -87,14 +88,23 @@
           (.removeChild n (.-lastChild n))))
       (when data
         (draw-chart data (merge params size)))))
+  (componentWillUnmount [this]
+    (let [{:keys [resize] :as state} (om/get-state this)]
+      (.removeEventListener js/window "resize" resize)
+      (om/set-state! this (dissoc state :resize))))
   (componentWillMount [this]
     (let [{:keys [parent-id]} (om/props this)]
-      (.addEventListener js/window
-                         "resize" (fn []
-                                    (om/set-state! this (get-chart-size parent-id))))))
+      (let [resize (fn []
+                     (when-let [size (get-chart-size parent-id)]
+                       (let [state (om/get-state this)]
+                         (om/set-state! this (assoc state :size size)))))
+            state  (om/get-state this)]
+        (om/set-state! this (assoc state :resize resize))
+        (.addEventListener js/window "resize" resize))))
   (render [this]
     (let [{:keys [id]} (om/props this)
-          {:keys [width height]} (om/get-state this)]
+          {{width  :width
+            height :height} :size} (om/get-state this)]
       (html
         [:div {:id     id
                :width  width
