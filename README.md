@@ -1,5 +1,7 @@
 # tech-radar
 
+[![Build Status](https://travis-ci.org/abtv/tech-radar.svg?branch=master)](https://travis-ci.org/abtv/tech-radar)
+
 ## 1. Prerequisites
 * OpenJDK 7 or Oracle JDK 8
 * Leiningen 2.5 or later
