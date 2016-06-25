@@ -9,6 +9,7 @@ cp .lein-env backend-release/
 cp twitter-security.edn backend-release/
 cp twitter-settings.edn backend-release/
 cp classify-settings.edn backend-release/
+cp hashtag-filter-settings.edn backend-release/
 cp target/backend.jar backend-release/
 echo 'backend was built'
 
