@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/abtv/tech-radar.png?label=ready&title=Ready)](https://waffle.io/abtv/tech-radar)
 # tech-radar
 
 ## 1. Prerequisites
