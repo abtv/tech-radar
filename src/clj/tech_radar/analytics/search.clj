@@ -23,7 +23,8 @@
 
 (defn- get-words [text]
   (->> (.toLowerCase text)
-       (re-seq word)))
+       (re-seq word)
+       (distinct)))
 
 (defn add-text [search {:keys [id text topics] :as orig}]
   (let [words (get-words text)]
@@ -83,7 +84,8 @@
         texts  (get-in search [:texts])]
     {:total total
      :texts (reduce (fn [acc id]
-                      (conj acc (assoc (get texts id) :id id))) [] ids)}))
+                      (let [obj (get texts id)]
+                        (conj acc (assoc obj :id id)))) [] ids)}))
 
 (defn remove-oldest-item [search]
   (let [dsearch     @search
