@@ -23,7 +23,7 @@
             [:li {} "discover new things which you are unaware"]
             [:li {} "read all the interesting tweets in your field of interest - it doesn't matter how many people you follow"]]
            [:p {} "Tech Radar uses Twitter as data source. It collects and analyzes tweets about programming and provides
-                   a convenient way for you to broad your knowledge horizonts."]
+                   a convenient way for you to broad your knowledge horizons."]
            [:hr {}]
            [:h4 {} [:i.fa.fa-info-circle {}] " How to use Tech Radar"]
            [:p {} "Use " [:a {:href "#/trends"} "Trends"] " menu item to see hashtag analytics. You can click any hashtag on a diagram
