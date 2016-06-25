@@ -36,7 +36,6 @@
                                    :max-texts-per-request   200
                                    :hashtag-filter-settings {:clojure #{"stop-word" "Another-word"}
                                                              :linux   #{"stop-word" "Another-Word"}}})
-        _ (prn model)
         created-at (now)
         topic-item (fn [tweet]
                      (select-keys tweet [:id :text :created-at :twitter-id]))
