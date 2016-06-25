@@ -109,3 +109,14 @@
                    "good" [4]
                    "text" [4]}}
            (:index @search)))))
+
+(deftest search-without-duplicates-test
+  (let [search     (new-search)
+        created-at (now)
+        t1         {:id         1
+                    :text       "a word can occur more than one time, but search results should contain only one record per relevant text"
+                    :twitter-id 100
+                    :created-at created-at}]
+    (add-text search (assoc t1 :topics #{:cool}))
+    (is (= {:total 1
+            :texts [t1]} (search-texts search :cool "one")))))
