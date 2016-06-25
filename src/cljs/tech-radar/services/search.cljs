@@ -11,6 +11,7 @@
                  (-> state
                      (assoc-in [:topics topic] texts)
                      (assoc-in [:settings :search-text] text)
+                     (assoc-in [:settings :page-number] 1)
                      (assoc-in [:current-screen] :topic)
                      (assoc-in [:current-topic] topic)))))
 
