@@ -2,6 +2,7 @@
 
 (defprotocol Analyze
   (search [this topic text])
+  (index-info [this])
   (trends [this])
   (texts [this topic]))
 

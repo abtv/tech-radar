@@ -3,15 +3,15 @@
                                                 get-resource
                                                 post-resource]]))
 
-(defn trends-resource [{:keys [get-trends-fn] :as analysis}]
+(defn trends-resource [{:keys [trends-fn] :as analysis}]
   (resource-handler get-resource
     :handle-ok (fn [ctx]
-                 (get-trends-fn))))
+                 (trends-fn))))
 
-(defn topic-resource [{:keys [get-texts-fn] :as analysis}]
+(defn topic-resource [{:keys [texts-fn] :as analysis}]
   (resource-handler get-resource
     :handle-ok (fn [{{{topic :topic} :params} :request :as ctx}]
-                 (get-texts-fn (keyword topic)))))
+                 (texts-fn (keyword topic)))))
 
 (defn search-resource [{:keys [search-fn] :as analysis}]
   (resource-handler post-resource
@@ -19,3 +19,8 @@
                   {text :text}   :body} :request :as ctx}]
              {:result (search-fn (keyword topic) text)})
     :handle-created :result))
+
+(defn index-resource [{:keys [index-info-fn] :as analysis}]
+  (resource-handler get-resource
+    :handle-ok (fn [ctx]
+                 (index-info-fn))))

@@ -87,6 +87,14 @@
                       (let [obj (get texts id)]
                         (conj acc (assoc obj :id id)))) [] ids)}))
 
+(defn index-info [search]
+  (let [texts      (get-in @search [:texts])
+        first-text (second (first texts))
+        last-text  (second (last texts))]
+    {:texts-count (count texts)
+     :latest      (:created-at first-text)
+     :newest      (:created-at last-text)}))
+
 (defn remove-oldest-item [search]
   (let [dsearch     @search
         words       (-> (:texts dsearch)

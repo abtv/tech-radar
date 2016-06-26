@@ -16,7 +16,8 @@
                                                 get-cached-trends]]
             [tech-radar.analytics.protocols :refer [init
                                                     texts
-                                                    search]]))
+                                                    search
+                                                    index-info]]))
 
 (defn- get-settings []
   {:max-hashtags-per-trend (-> env
@@ -34,10 +35,10 @@
 
 (defrecord Analysis [database metrics preprocessor
                      stop-hashtags-update-fn stop-cache-update-fn
-                     get-trends-fn get-texts-fn search-fn]
+                     trends-fn texts-fn search-fn index-info-fn]
   component/Lifecycle
   (start [component]
-    (if get-trends-fn
+    (if trends-fn
       component
       (do
         (timbre/info "Initializing analysis")
@@ -72,18 +73,20 @@
                                                          :cache-update-timeout-s cache-update-timeout-s})]
           (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
                            :stop-cache-update-fn stop-cache-update-fn
-                           :get-trends-fn (fn []
-                                            (get-cached-trends cache))
-                           :get-texts-fn (fn [topic]
-                                           (texts model topic))
+                           :trends-fn (fn []
+                                        (get-cached-trends cache))
+                           :texts-fn (fn [topic]
+                                       (texts model topic))
                            :search-fn (fn [topic text]
-                                        (search model topic text)))))))
+                                        (search model topic text))
+                           :index-info-fn (fn []
+                                            (index-info model)))))))
   (stop [component]
     (when stop-cache-update-fn
       (timbre/info "Stopping analysis")
       (stop-cache-update-fn)
       (stop-hashtags-update-fn)
-      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :get-trends-fn :get-texts-fn :search-fn))))
+      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :trends-fn :texts-fn :search-fn :index-info-fn))))
 
 (defn new-analysis []
   (map->Analysis {}))

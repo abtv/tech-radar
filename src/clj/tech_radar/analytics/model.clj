@@ -2,10 +2,10 @@
   (:require [tech-radar.analytics.protocols :refer [Analyze
                                                     Storage
                                                     Tweet]]
-            [tech-radar.analytics.search :refer [new-search
-                                                 add-text
-                                                 remove-oldest-item
-                                                 search-texts]]))
+            [tech-radar.analytics.search :as search :refer [new-search
+                                                            add-text
+                                                            remove-oldest-item
+                                                            search-texts]]))
 
 (defn- remove-old-tweets [tweets max-tweet-count]
   (let [tweet-count (count tweets)]
@@ -87,6 +87,8 @@
   Analyze
   (search [this topic text]
     (search-texts (:search this) topic text))
+  (index-info [this]
+    (search/index-info (:search this)))
   (trends [this]
     (let [{:keys [data settings]} this]
       (get-trends data settings)))

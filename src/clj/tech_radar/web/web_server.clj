@@ -3,16 +3,19 @@
             [bidi.ring :as bidi-ring]
             [tech-radar.web.resources :refer [trends-resource
                                               topic-resource
-                                              search-resource]]
+                                              search-resource
+                                              index-resource]]
             [taoensso.timbre :as timbre]))
 
 (defn- create-resources [analysis]
   {:trends (trends-resource analysis)
    :topics (topic-resource analysis)
-   :search (search-resource analysis)})
+   :search (search-resource analysis)
+   :index  (index-resource analysis)})
 
 (def get-routes {"trends"           :trends
-                 ["topics/" :topic] :topics})
+                 ["topics/" :topic] :topics
+                 "index"            :index})
 
 (def post-routes {["search/" :topic] :search})
 
