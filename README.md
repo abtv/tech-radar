@@ -3,18 +3,29 @@
 [![Build Status](https://travis-ci.org/abtv/tech-radar.svg?branch=master)](https://travis-ci.org/abtv/tech-radar)
 [![Stories in Ready](https://badge.waffle.io/abtv/tech-radar.png?label=ready&title=Ready)](https://waffle.io/abtv/tech-radar)
 
-## 1. Prerequisites
+## 1. See it in action
+
+You can:
+
+1. use <a href="http://tech-radar.github.io" target="_blank">direct link</a> to `tech-radar` service
+2. watch a nice demo video:
+
+<a href="https://www.youtube.com/watch?v=NIcm-P-aLmA" target="_blank">
+  <img src="demo.jpg"/>
+</a>
+
+## 2. Prerequisites
 * OpenJDK 7 or Oracle JDK 8
 * Leiningen 2.5 or later
 * Git
 * PostgreSQL 9.4 or later
 
-## 2. PostgreSQL settings
+## 3. PostgreSQL settings
 
 Default database is `tech_radar`, default user is `postgres`, default password is `postgres`. 
 You can change these settings with `database` parameter in `project.clj` file (development) and `.lein-env` file (production).
 
-## 3. Twitter security settings
+## 4. Twitter security settings
 
 `tech-radar` receives data from Twitter stream. You need to create a file called `twitter-security.edn` 
 in the project folder with the following content:
@@ -26,7 +37,7 @@ in the project folder with the following content:
  :user-token-secret "your user token secret"}
 ```
 
-## 4. Build from sources
+## 5. Build from sources
 
 Clone `tech-radar` repository
 
@@ -43,7 +54,7 @@ Build with `build-release-all.sh` script
 `frontend-release` folder contains frontend application
 `backend-release` folder contains backend application and all the settings and security files
 
-## 5. Deployment to Ubuntu 14.04 server
+## 6. Deployment to Ubuntu 14.04 server
 
 1. `deploy/install-env.sh` file contains everything you need to setup environment for tech-radar under Ubuntu server
 2. put `deploy/tech-radar.conf` file to `/etc/init/` folder
@@ -54,7 +65,7 @@ Instead of #3 I use the following
 1. set `SCPTECHRADAR` variable to your `username@address:path-to-copy-zip-archive`
 2. run `build-and-upload.sh` script (it builds the app and uploads backend and frontend)
 
-## 6. Future work
+## 7. Future work
 
 1. Make more backend tests, at least analysis tests
 2. Use Om.Next for frontend
