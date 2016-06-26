@@ -66,7 +66,7 @@
      :topics     #{topic}}))
 
 (defn- join-to-tweets [xs]
-  (when xs
+  (when (seq xs)
     (loop [tweet  (-> (first xs)
                       (to-tweet))
            xs     (next xs)
