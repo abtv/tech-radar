@@ -3,7 +3,8 @@
             [sablono.core :refer-macros [html]]
             [tech-radar.state :refer [app-state]]
             [tech-radar.utils.text-formatter :refer [format]]
-            [tech-radar.ui.message-view :refer [message-view]]))
+            [tech-radar.ui.message-view :refer [message-view]]
+            [goog.string :as gstring]))
 
 (defn- format-time-number [n]
   (if (< n 10)
@@ -28,7 +29,7 @@
                       (format-time-number))
             day   (-> (.getDate t)
                       (format-time-number))]
-        (str day "." month "." year " " hours ":" minutes)))))
+        (str day "." month "." year (gstring/unescapeEntities "&nbsp;") hours ":" minutes)))))
 
 (defui TextItem
   Object
