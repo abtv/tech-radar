@@ -23,13 +23,12 @@
                     (format-time-number))]
     (if (today? t now)
       (str hours ":" minutes)
-      (let [year  (.getFullYear t)
-            month (-> (.getMonth t)
+      (let [month (-> (.getMonth t)
                       (inc)
                       (format-time-number))
             day   (-> (.getDate t)
                       (format-time-number))]
-        (str day "." month "." year (gstring/unescapeEntities "&nbsp;") hours ":" minutes)))))
+        (str day "." month (gstring/unescapeEntities "&nbsp;") hours ":" minutes)))))
 
 (defui TextItem
   Object
