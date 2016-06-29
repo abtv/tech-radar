@@ -35,7 +35,7 @@
   (render [this]
     (let [{:keys [id text]} (om/props this)]
       (html
-        [:div {}
+        [:div.text-item {}
          (mapv identity (format text id))]))))
 
 (def text-item (om/factory TextItem))
@@ -48,7 +48,7 @@
       (html
         [:tr {}
          [:td {}
-          [:div.text-center
+          [:div.text-center {}
            [:a {:href   (str "https://twitter.com/statuses/" twitter-id)
                 :target "_blank"}
             (time->str created-at now)]]]

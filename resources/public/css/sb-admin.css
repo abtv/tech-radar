@@ -268,4 +268,10 @@ ul.alert-dropdown {
     }
 }
 
+@media(max-width: 768px) {
+    .text-item {
+        white-space: pre-wrap;
+    }
+}
+
 
