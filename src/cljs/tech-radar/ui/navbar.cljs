@@ -19,12 +19,14 @@
      [:img {:src "images/radar.svg"}]]))
 
 (defn records-per-page-settings [records-per-page set-record-count]
-  [:ul {:class "nav navbar-right top-nav"}
-   [:li {:class "dropdown"}
-    [:a {:href "#", :class "dropdown-toggle", :data-toggle "dropdown", :aria-expanded "false"}
-     [:i {:class "fa fa-gear"} " records per page "]
-     [:b {:class "caret"}]]
-    [:ul {:class "dropdown-menu "}
+  [:ul.nav.navbar-right.top-nav.records-per-page {}
+   [:li.dropdown {}
+    [:a.dropdown-toggle {:href          "#"
+                         :data-toggle   "dropdown"
+                         :aria-expanded "false"}
+     [:i.fa.fa-gear " records per page "]
+     [:b.caret]]
+    [:ul.dropdown-menu
      (mapv (fn [records-count]
              [:li {:class (if (= records-per-page records-count)
                             "active"
@@ -48,7 +50,7 @@
             (menu-item (assoc params :selected (= id current-topic)))) topic-items)]])
 
 (defn search-input [navbar-component topic search-text]
-  [:form.navbar-form.navbar-right {}
+  [:form.navbar-form.navbar-right.search-input {}
    [:div.input-group {}
     [:input.form-control {:type        "text"
                           :placeholder "Search..."

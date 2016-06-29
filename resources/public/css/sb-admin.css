@@ -254,3 +254,18 @@ ul.alert-dropdown {
     border-color: white;
     cursor: default;
 }
+
+@media(max-width: 768px) {
+    .search-input {
+        margin: 2px;
+        padding: 2px;
+    }
+}
+
+@media(max-width: 768px) {
+    .records-per-page {
+        display: none;
+    }
+}
+
+
