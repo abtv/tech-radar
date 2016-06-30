@@ -5,7 +5,7 @@
             [tech-radar.state :refer [app-state]]
             [tech-radar.services.search :refer [make-search]]))
 
-(defn brand-toggle []
+(defn brand-toggle [current-menu-item]
   (html
     [:div.navbar-header {}
      [:button.navbar-toggle {:type        "button"
@@ -16,7 +16,9 @@
       [:span.icon-bar {}]
       [:span.icon-bar {}]]
      [:a.navbar-brand {:href "#/"} "Tech Radar"]
-     [:img {:src "images/radar.svg"}]]))
+     [:img {:src "images/radar.svg"}]
+     [:div.topic-container
+      [:span.topic-header current-menu-item]]]))
 
 (defn records-per-page-settings [records-per-page set-record-count]
   [:ul.nav.navbar-right.top-nav.records-per-page {}
@@ -65,6 +67,13 @@
                                            (prevent-propagation e))}
       [:i.fa.fa-search {} ""]]]]])
 
+(defn- current-menu-item [current-screen current-topic menu-items]
+  (cond
+    (= :home current-screen) ""
+    (= :trends current-screen) "Trends"
+    :else (-> (get menu-items current-topic)
+              (:name))))
+
 (defui NavBar
   static om/IQuery
   (query [this]
@@ -80,7 +89,7 @@
     (let [{:keys [records-per-page menu-items search-text]} (om/props this)
           {:keys [current-screen current-topic]} (om/get-computed this)]
       (html [:nav.navbar.navbar-inverse.navbar-fixed-top {:role "navigation"}
-             (brand-toggle)
+             (brand-toggle (current-menu-item current-screen current-topic menu-items))
              (when (= :topic current-screen)
                (search-input this current-topic search-text))
              (when (= :topic current-screen)

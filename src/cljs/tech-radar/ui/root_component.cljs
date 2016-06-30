@@ -37,7 +37,7 @@
          [:div#page-wrapper {}
           (condp = current-screen
             :home (home state)
-            :trends (trends-view (om/computed state {:set-trend-type #(.set-trend-type this %)
+            :trends (trends-view (om/computed state {:set-trend-type    #(.set-trend-type this %)
                                                      :set-current-trend #(.set-current-trend this %)}))
             (topic-view (om/computed state
                                      {:set-page-number

@@ -274,4 +274,21 @@ ul.alert-dropdown {
     }
 }
 
+.topic-header {
+    display: none;
+}
+
+.topic-container {
+    display: inline;
+}
+
+@media(max-width: 768px) {
+    .topic-header {
+        display: inline;
+        color: white;
+        height: 50px;
+        line-height: 50px;
+        padding-left: 14px;
+    }
+}
 
