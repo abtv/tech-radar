@@ -16,19 +16,27 @@
        (= (.getMonth t) (.getMonth now))
        (= (.getDate t) (.getDate now))))
 
-(defn- time->str [t now]
+(defn- time->str-time [t]
   (let [hours   (-> (.getHours t)
                     (format-time-number))
         minutes (-> (.getMinutes t)
                     (format-time-number))]
+    (str hours ":" minutes)))
+
+(defn time->str-date [t]
+  (let [month (-> (.getMonth t)
+                  (inc)
+                  (format-time-number))
+        day   (-> (.getDate t)
+                  (format-time-number))]
+    (str day "." month)))
+
+(defn- time->str [t now]
+  (let [time (time->str-time t)
+        date (time->str-date t)]
     (if (today? t now)
-      (str hours ":" minutes)
-      (let [month (-> (.getMonth t)
-                      (inc)
-                      (format-time-number))
-            day   (-> (.getDate t)
-                      (format-time-number))]
-        (str day "." month (gstring/unescapeEntities "&nbsp;") hours ":" minutes)))))
+      time
+      (str time (gstring/unescapeEntities "&nbsp;") date))))
 
 (defui TextItem
   Object
@@ -40,18 +48,30 @@
 
 (def text-item (om/factory TextItem))
 
+(defn time-view [href created-at]
+  (let [now (js/Date.)]
+    [:div.text-center {:style {:word-wrap "break-word"}}
+     [:a.desktop-time {:href   href
+                       :target "_blank"}
+      (time->str created-at now)]
+     [:a.mobile-time {:href   href
+                      :target "_blank"}
+      (time->str-time created-at)]
+     (when-not (today? created-at now)
+       [:a.mobile-time {:href   href
+                        :target "_blank"}
+        (time->str-date created-at)])]))
+
 (defui TopicItem
   Object
   (render [this]
     (let [{:keys [id twitter-id created-at text]} (om/props this)
-          now (js/Date.)]
+          href (str "https://twitter.com/statuses/" twitter-id)]
       (html
         [:tr {}
          [:td {}
           [:div.text-center {}
-           [:a {:href   (str "https://twitter.com/statuses/" twitter-id)
-                :target "_blank"}
-            (time->str created-at now)]]]
+           (time-view href created-at)]]
          [:td {} (text-item {:id   id
                              :text text})]]))))
 

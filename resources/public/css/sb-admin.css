@@ -292,3 +292,22 @@ ul.alert-dropdown {
     }
 }
 
+.desktop-time {
+    display: block;
+}
+
+.mobile-time {
+    display: none;
+}
+
+@media(max-width: 768px) {
+    .desktop-time {
+        display: none;
+    }
+
+    .mobile-time {
+        display: block;
+    }
+}
+
+
