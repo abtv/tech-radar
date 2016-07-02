@@ -36,7 +36,7 @@
         date (time->str-date t)]
     (if (today? t now)
       time
-      (str time (gstring/unescapeEntities "&nbsp;") date))))
+      (str date (gstring/unescapeEntities "&nbsp;") time))))
 
 (defui TextItem
   Object
@@ -54,13 +54,13 @@
      [:a.desktop-time {:href   href
                        :target "_blank"}
       (time->str created-at now)]
-     [:a.mobile-time {:href   href
-                      :target "_blank"}
-      (time->str-time created-at)]
      (when-not (today? created-at now)
        [:a.mobile-time {:href   href
                         :target "_blank"}
-        (time->str-date created-at)])]))
+        (time->str-date created-at)])
+     [:a.mobile-time {:href   href
+                      :target "_blank"}
+      (time->str-time created-at)]]))
 
 (defui TopicItem
   Object
