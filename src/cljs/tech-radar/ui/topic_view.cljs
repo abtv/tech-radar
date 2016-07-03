@@ -110,6 +110,9 @@
      [:a {:on-click (set-page-number page-number)}
       page-number]]))
 
+(defn- mobile? []
+  (<= (.-innerWidth js/window) 768))
+
 (defn- pagintation [{:keys [texts records-per-page page-number set-page-number]}]
   (when (seq texts)
     (let [texts-count (count texts)
@@ -118,7 +121,10 @@
                           (int))
           pages-count (if (= 0 (mod texts-count records-per-page))
                         pages-count
-                        (inc pages-count))]
+                        (inc pages-count))
+          pages-count (if (mobile?)
+                        (min pages-count 8)
+                        pages-count)]
       (when (> pages-count 1)
         [:div.text-center {}
          [:div {}
