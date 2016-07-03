@@ -111,7 +111,8 @@
       page-number]]))
 
 (defn- mobile? []
-  (<= (.-innerWidth js/window) 768))
+  (let [max-mobile-width 768]
+    (<= (.-innerWidth js/window) max-mobile-width)))
 
 (defn- pagintation [{:keys [texts records-per-page page-number set-page-number]}]
   (when (seq texts)
