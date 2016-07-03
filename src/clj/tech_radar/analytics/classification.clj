@@ -1,12 +1,12 @@
 (ns tech-radar.analytics.classification
   (:require [clojure.set :refer [intersection]]))
 
-(def word #"[\p{L}\-]+")
+(def word #"[\p{L}0-9\-]+")
 
-(def hashtag #"\B#\p{L}*[\p{L}-]+\p{L}*")
+(def hashtag #"\B#[\p{L}^\-]+[\p{L}0-9\-^\-]*[\p{L}0-9]+")
 
 (defn- index-phrases [phrases]
-  (map (fn [phrase]
+  (map (fn [^String phrase]
          (->> (re-seq word phrase)
               (map (fn [^String s]
                      (.toLowerCase s)))
