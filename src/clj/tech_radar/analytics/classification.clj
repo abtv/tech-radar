@@ -1,17 +1,9 @@
 (ns tech-radar.analytics.classification
-  (:require [clojure.set :refer [intersection]]))
-
-(def word #"[\p{L}0-9\-]+")
-
-(def hashtag #"\B#[\p{L}^\-]+[\p{L}0-9\-^\-]*[\p{L}0-9]+")
+  (:require [clojure.set :refer [intersection]]
+            [tech-radar.analytics.utils :refer [get-words]]))
 
 (defn- index-phrases [phrases]
-  (map (fn [^String phrase]
-         (->> (re-seq word phrase)
-              (map (fn [^String s]
-                     (.toLowerCase s)))
-              (set)))
-       phrases))
+  (map get-words phrases))
 
 (defn index-topics [topics]
   (->> topics
@@ -19,17 +11,21 @@
               [name (index-phrases phrases)]))
        (into {})))
 
+(defn- remove-hashtag-signs [words-set]
+  (->> words-set
+       (map (fn [^String word]
+              (when word
+                (if (.startsWith word "#")
+                  (subs word 1)
+                  word))))
+       (into #{})))
+
 (defn classify [^String text indexed-topics]
-  (let [words (->> (.toLowerCase text)
-                   (re-seq word)
-                   (set))]
+  (let [words (-> (get-words text)
+                  (remove-hashtag-signs))]
     (->> indexed-topics
          (filter (fn [[_ phrases]]
                    (some (fn [phrase]
                            (= phrase (intersection words phrase))) phrases)))
          (map first)
          (set))))
-
-(defn get-hashtags [text]
-  (->> (re-seq hashtag text)
-       (set)))

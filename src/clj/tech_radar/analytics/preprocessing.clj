@@ -1,7 +1,7 @@
 (ns tech-radar.analytics.preprocessing
   (:require [taoensso.timbre :as timbre]
-            [tech-radar.analytics.classification :refer [classify
-                                                         get-hashtags]]
+            [tech-radar.analytics.classification :refer [classify]]
+            [tech-radar.analytics.utils :refer [get-hashtags]]
             [tech-radar.utils.parsers :refer [parse-twitter-date]]))
 
 (defn- streamed-tweet->tweet [{:keys [id-str text created-at retweeted user]}]

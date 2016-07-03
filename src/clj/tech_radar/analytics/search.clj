@@ -1,6 +1,5 @@
-(ns tech-radar.analytics.search)
-
-(def word #"[#]?[\p{L}\-]+")
+(ns tech-radar.analytics.search
+  (:require [tech-radar.analytics.utils :refer [get-words]]))
 
 (defn new-search []
   (atom {:texts (sorted-map)
@@ -20,11 +19,6 @@
                        (reduce (fn [search topic]
                                  (update-in search [:index topic word] conj-ids)) search topics))]
     (reduce words-reduce search words)))
-
-(defn- get-words [^String text]
-  (->> (.toLowerCase text)
-       (re-seq word)
-       (distinct)))
 
 (defn add-text [search {:keys [id text topics] :as orig}]
   (let [words (get-words text)]

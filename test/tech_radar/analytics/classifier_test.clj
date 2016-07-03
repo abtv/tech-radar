@@ -1,8 +1,8 @@
 (ns tech-radar.analytics.classifier-test
   (:require [clojure.test :refer :all]
             [tech-radar.analytics.classification :refer [index-topics
-                                                         classify
-                                                         get-hashtags]]))
+                                                         classify]]
+            [tech-radar.analytics.utils :refer [get-hashtags]]))
 
 (deftest index-topics-test
   (let [topics         {:jvm     ["JVM" "scala lang" "java"]
@@ -19,7 +19,8 @@
     (is (= #{} (classify "Some text" topics)))
     (is (= #{} (classify "let's talk about wheather" topics)))
     (is (= #{:clojure} (classify "I like Clojure lang" topics)))
-    (is (= #{:jvm} (classify "JVM is virtual machine" topics)))
+    (is (= #{:jvm} (classify "JVM is a virtual machine" topics)))
+    (is (= #{:jvm} (classify "#JVM is a virtual machine" topics)))
     (is (= #{:clojure :jvm} (classify "Clojure runs under JVM" topics)))))
 
 (deftest get-hashtags-test
