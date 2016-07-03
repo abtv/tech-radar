@@ -5,6 +5,7 @@
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [tech-radar.web.web-server :refer [create-ring-handler
+                                               wrap-charset
                                                allow-cross-origin
                                                wrap-exception]]
             [ring.middleware.params :refer [wrap-params]]
@@ -25,6 +26,7 @@
                                (parse-int))
               _            (timbre/info "Starting web server on host:" host ", with port:" port)
               ring-handler (-> (create-ring-handler analysis)
+                               (wrap-charset)
                                (allow-cross-origin)
                                (wrap-transit-body {:keywords? true :opts {}})
                                (wrap-exception))

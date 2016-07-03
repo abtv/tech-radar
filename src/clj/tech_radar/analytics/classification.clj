@@ -1,9 +1,9 @@
 (ns tech-radar.analytics.classification
   (:require [clojure.set :refer [intersection]]))
 
-(def word #"[\w\-]+")
+(def word #"[\p{L}\-]+")
 
-(def hashtag #"\B#\w*[\w-]+\w*")
+(def hashtag #"\B#\p{L}*[\p{L}-]+\p{L}*")
 
 (defn- index-phrases [phrases]
   (map (fn [phrase]

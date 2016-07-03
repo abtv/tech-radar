@@ -5,7 +5,8 @@
                                               topic-resource
                                               search-resource
                                               index-resource]]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre]
+            [ring.util.response :refer [charset]]))
 
 (defn- create-resources [analysis]
   {:trends (trends-resource analysis)
@@ -29,20 +30,24 @@
                      (resources id))]
     (bidi-ring/make-handler route handler-fn)))
 
-(defn allow-cross-origin
-  [handler]
+(defn wrap-charset [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (charset response "UTF-8"))))
+
+(defn allow-cross-origin [handler]
   (fn [request]
     (let [response (handler request)]
       (-> response
           (assoc-in [:headers "Access-Control-Allow-Origin"] "*")
           (assoc-in [:headers "Access-Control-Allow-Methods"] "GET,PUT,POST,DELETE,OPTIONS")
-          (assoc-in [:headers "Access-Control-Allow-Headers"]
-                    "X-Requested-With,Content-Type,Cache-Control,token")))))
+          (assoc-in [:headers "Access-Control-Allow-Headers"] "X-Requested-With,Content-Type,Cache-Control,token")))))
 
-(defn wrap-exception [f]
+(defn wrap-exception [handler]
   (fn [request]
-    (try (f request)
-         (catch Exception e
-           (timbre/error e)
-           {:status 500
-            :body   "Server error"}))))
+    (try
+      (handler request)
+      (catch Exception e
+        (timbre/error e)
+        {:status 500
+         :body   "Server error"}))))

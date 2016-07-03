@@ -1,4 +1,4 @@
-(ns tech-radar.utils.parsers_test
+(ns tech-radar.utils.parsers-test
   (:require [clojure.test :refer :all]
             [tech-radar.utils.parsers :refer [parse-twitter-date]]
             [clj-time.core :as time]))

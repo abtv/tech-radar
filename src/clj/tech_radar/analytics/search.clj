@@ -1,6 +1,6 @@
 (ns tech-radar.analytics.search)
 
-(def word #"[#]?[\w\-]+")
+(def word #"[#]?[\p{L}\-]+")
 
 (defn new-search []
   (atom {:texts (sorted-map)
@@ -69,13 +69,15 @@
    :ids   (take-last-vec 100 ids)})
 
 (defn- get-ids [search topic words]
-  (->> words
-       (take 3)
-       (mapv (fn [word]
-               (get-in search [:index topic word])))
-       (sort-by count)
-       (apply merge-ids)
-       (to-result)))
+  (let [all-ids (->> words
+                     (take 3)
+                     (mapv (fn [word]
+                             (get-in search [:index topic word])))
+                     (sort-by count))
+        ids     (if (seq all-ids)
+                  (apply merge-ids all-ids)
+                  [])]
+    (to-result ids)))
 
 (defn search-texts [search topic text]
   (let [words  (get-words text)
