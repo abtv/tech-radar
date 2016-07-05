@@ -56,8 +56,9 @@
                                                 :asset-path "js"
                                                 :output-dir "resources/public/js"}}
                        :release {:source-paths ["src/cljs"]
-                                 :compiler     {:optimizations :advanced
-                                                :output-to     "frontend-release/main.js"}}}}
+                                 :compiler     {:optimizations   :advanced
+                                                :closure-defines {"goog.DEBUG" false}
+                                                :output-to       "frontend-release/main.js"}}}}
 
   :profiles {:dev     {:env {:host                    "localhost"
                              :port                    "3000"
