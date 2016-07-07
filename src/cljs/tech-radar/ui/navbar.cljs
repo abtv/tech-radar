@@ -6,19 +6,22 @@
             [tech-radar.services.search :refer [make-search]]))
 
 (defn brand-toggle [current-menu-item]
-  (html
-    [:div.navbar-header {}
-     [:button.navbar-toggle {:type        "button"
-                             :data-toggle "collapse"
-                             :data-target ".navbar-ex1-collapse"}
-      [:span.sr-only {} "Toggle navigation"]
-      [:span.icon-bar {}]
-      [:span.icon-bar {}]
-      [:span.icon-bar {}]]
-     [:a.navbar-brand {:href "#/"} "Tech Radar"]
-     [:img {:src "images/radar.svg"}]
-     [:div.topic-container
-      [:span.topic-header current-menu-item]]]))
+  [:div.navbar-header {}
+   [:button.navbar-toggle {:type        "button"
+                           :data-toggle "collapse"
+                           :data-target ".navbar-ex1-collapse"}
+    [:span.sr-only {} "Toggle navigation"]
+    [:span.icon-bar {}]
+    [:span.icon-bar {}]
+    [:span.icon-bar {}]]
+   [:a.navbar-brand {:href "#/"} "Tech Radar"]
+   [:img {:src "images/radar.svg"}]
+   [:div.topic-container
+    [:span.topic-header current-menu-item]]
+   (when (= current-menu-item "")
+     [:a.fork-me {:href   "https://github.com/abtv/tech-radar"
+                  :target "_blank"}
+      [:img.fork-me-img {:src "images/forkme.png"}]])])
 
 (defn records-per-page-settings [records-per-page set-record-count]
   [:ul.nav.navbar-right.top-nav.records-per-page {}
