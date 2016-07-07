@@ -314,3 +314,52 @@ ul.alert-dropdown {
         display: block;
     }
 }
+
+.fork-me-desktop {
+    display: block;
+}
+
+.fork-me-desktop-img {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+@media(max-width: 768px){
+    .fork-me-desktop {
+        display: none;
+    }
+}
+
+.fork-me-mobile-wrapper {
+    display: none;
+    height: 50px;
+    margin: 0;
+}
+
+@media(max-width: 768px){
+    .fork-me-mobile-wrapper{
+        display: inline;
+    }
+}
+
+.fork-me-mobile {
+    color: red;
+    text-decoration: underline;
+}
+
+.fork-me-mobile:link {
+    color: red;
+}
+
+.fork-me-mobile:hover {
+    color: red;
+}
+
+.fork-me-mobile:visited {
+    color: red;
+}
+
+.fork-me-mobile:active {
+    color: red;
+}
