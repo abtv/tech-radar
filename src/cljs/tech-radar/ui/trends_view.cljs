@@ -40,14 +40,15 @@
   (let [{:keys [bounds margins plot x-axis y-axis name]} chart
         Chart        (.-chart js/dimple)
         svg          (.newSvg js/dimple (str "#" id) width height)
-        dimple-chart (.setMargins (Chart. svg) (:left margins) (:top margins) (:right margins) (:bottom margins))
+        dimple-chart (.setMargins (Chart. svg (clj->js data)) (:left margins) (:top margins) (:right margins) (:bottom margins))
         x            (.addMeasureAxis dimple-chart "x" x-axis)
         y            (.addCategoryAxis dimple-chart "y" y-axis)
-        s            (.addSeries dimple-chart "" plot (clj->js [x y]))]
-    (aset s "data" (clj->js data))
+        series       (.addSeries dimple-chart "" plot (clj->js [x y]))]
+    (.addOrderRule y  x-axis false)
     (.draw dimple-chart)
     (.text (.-titleShape x) name)
     (.text (.-titleShape y) "")
+
     (set-hashtag-click)))
 
 (defn- new-chart-params [{:keys [id name width height]}]
