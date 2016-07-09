@@ -15,7 +15,7 @@
     height: 50px;
 }
 
-@media(min-width:768px) {
+@media(max-width:768px) {
     #app {
         margin-top: 50px;
     }
