@@ -152,7 +152,7 @@
           :on-click #(set-trend-type trend-type)}
      [:a name]]))
 
-(defn- trend-item->name [trend]
+(defn- trend-item->trend-name [trend]
   (case trend
     :jobs "Jobs"
     :clojure "Clojure"
@@ -162,14 +162,33 @@
     :linux "Linux"
     :nosql "NoSQL"))
 
-(defn topic-item [trend current-trend set-current-trend]
-  (let [name (trend-item->name trend)]
-    [:li {:key      (str "topic-item-" name)
+
+(defn- trend-name->trend-item [name]
+  (case name
+    "Jobs" :jobs
+    "Clojure" :clojure
+    "JVM" :jvm
+    "JavaScript" :javascript
+    "Golang" :golang
+    "Linux" :linux
+    "NoSQL" :nosql))
+
+(defn trend-list-item [trend current-trend set-current-trend]
+  (let [name (trend-item->trend-name trend)]
+    [:li {:key      (str "trend-list-item-" name)
           :class    (if (= trend current-trend)
                       "active cursor"
                       "cursor")
           :on-click #(set-current-trend trend)}
      [:a name]]))
+
+(defn trend-select-item [trend current-trend]
+  (let [name (trend-item->trend-name trend)]
+    [:option {:key      (str "trend-select-item-" name)
+          :selected    (if (= trend current-trend)
+                      "selected"
+                      "")}
+     name]))
 
 (defui TrendsView
   static om/IQuery
@@ -184,11 +203,23 @@
          (if (seq trends)
            [:div
             [:div.row
-             [:div.col-lg-6
+
+             ;desktop buttons
+             [:div.col-lg-6.fork-me-desktop
               [:div.text-center {}
                [:ul.pagination.no-borders {}
                 (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
-                     (mapv #(topic-item % current-trend set-current-trend)))]]]
+                     (mapv #(trend-list-item % current-trend set-current-trend)))]]]
+
+             ;moblie dropdown
+             [:div.col-lg-6.fork-me-mobile-wrapper
+             [:div.text-center {}
+              [:select.combobox.input-large.form-control {:on-change (fn [e]
+                                                                       (set-current-trend (-> e .-target .-value trend-name->trend-item)))
+                                                          }
+               (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
+                    (mapv #(trend-select-item % current-trend)))]]]
+
              [:div.col-lg-6
               [:div.text-center {}
                [:ul.pagination.no-borders {}
