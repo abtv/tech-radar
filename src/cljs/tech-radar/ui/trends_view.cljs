@@ -185,10 +185,8 @@
 (defn trend-select-item [trend current-trend]
   (let [name (trend-item->trend-name trend)]
     [:option {:key      (str "trend-select-item-" name)
-          :selected    (if (= trend current-trend)
-                      "selected"
-                      "")}
-     name]))
+    :value name}
+    name]))
 
 (defui TrendsView
   static om/IQuery
