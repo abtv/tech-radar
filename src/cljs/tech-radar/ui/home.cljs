@@ -3,12 +3,49 @@
             [sablono.core :refer-macros [html]]
             [tech-radar.ui.message-view :refer [message-view]]))
 
+(defui Pie-diagram
+  Object
+  (componentDidMount  [this]
+    (let [{:keys [id data width height series measure-axis] } (om/props this)
+    Chart          (.-chart js/dimple)
+    svg            (.newSvg js/dimple (str "#" id) width height)
+    dimple-chart   (Chart. svg (clj->js data))
+    count-axis     (.addMeasureAxis dimple-chart "p" "count")]
+    (.addSeries dimple-chart series dimple.plot.pie )
+    (.draw dimple-chart)))
+
+  (render [this]
+    (let [{:keys [id width height]} (om/props this)]
+      (html
+        [:div {:id     id
+               :width  width
+               :height height}]))))
+
+(def pie-diagram (om/factory Pie-diagram))
+
+
+(def data [
+           {:hashtag ".net1" :count 10},
+           {:hashtag ".net2" :count 20},
+           {:hashtag ".net3" :count 30},
+           {:hashtag ".net4" :count 40},
+           {:hashtag ".net5" :count 50},
+           ])
+
 (defui Home
   Object
   (render [this]
     (html
       (let [props (om/props this)]
         [:div.container-fluid
+         (pie-diagram {
+                       :id "pie"
+                       :width 200
+                       :height 200
+                       :data data
+                       :measure-axis "count"
+                       :series "hashtag"
+                       })
          [:div.row {}
           [:div.col-lg-12 {}
            [:h3 {} "Tech Radar helps you to be aware of modern trends in programming"]
