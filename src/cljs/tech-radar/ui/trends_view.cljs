@@ -67,8 +67,8 @@
   (let [e            (.getElementById js/document id)
         x            (.-clientWidth e)
         width-offset 30
-        height       640]
-    {:width (- x width-offset) :height height}))
+        height       (.-clientHeight (.-documentElement js/document))]
+    {:width (- x width-offset) :height (* height 0.87)}))
 
 (defui Chart
   Object
@@ -201,28 +201,33 @@
          (if (seq trends)
            [:div
             [:div.row
-
-             ;desktop buttons
+             ;desktop
              [:div.col-lg-6.fork-me-desktop
               [:div.text-center {}
                [:ul.pagination.no-borders {}
                 (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
                      (mapv #(trend-list-item % current-trend set-current-trend)))]]]
+             [:div.col-lg-6.fork-me-desktop
+              [:div.text-center {}
+               [:ul.pagination.no-borders {}
+                (->> [:daily :weekly :monthly]
+                     (mapv #(trend-item % trend-type set-trend-type)))]]]
 
-             ;moblie dropdown
-             [:div.col-lg-6.fork-me-mobile-wrapper
-             [:div.text-center {}
+             ;mobile
+             [:div.col-xs-7.fork-me-mobile-wrapper
               [:select.combobox.input-large.form-control {:on-change (fn [e]
                                                                        (set-current-trend (-> e .-target .-value trend-name->trend-item)))
                                                           }
                (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
-                    (mapv #(trend-select-item % current-trend)))]]]
+                    (mapv #(trend-select-item % current-trend)))]]
 
-             [:div.col-lg-6
+             [:div.col-xs-5.fork-me-mobile-wrapper
               [:div.text-center {}
                [:ul.pagination.no-borders {}
                 (->> [:daily :weekly :monthly]
                      (mapv #(trend-item % trend-type set-trend-type)))]]]]
+
+
             (chart-view (om/computed props {:trend-type    trend-type
                                             :current-trend current-trend}))]
            (message-view {:text "Loading trends, please wait."}))]))))

@@ -15,6 +15,10 @@
     height: 50px;
 }
 
+.combobox {
+    margin: 5px;
+}
+
 @media(max-width:768px) {
     .top-shifted {
         margin-top: 100px;
