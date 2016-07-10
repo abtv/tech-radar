@@ -3,6 +3,46 @@
             [sablono.core :refer-macros [html]]
             [tech-radar.ui.message-view :refer [message-view]]))
 
+(defui Pie-diagram
+  Object
+  (componentDidMount  [this]
+    (let [{:keys [id data width height series measure-axis] } (om/props this)
+    Chart          (.-chart js/dimple)
+    svg            (.newSvg js/dimple (str "#" id) width height)
+
+    dimple-chart   (Chart. svg (clj->js data))]
+    (.addMeasureAxis dimple-chart "p" measure-axis)
+    (.addSeries dimple-chart series dimple.plot.pie)
+    (.addLegend dimple-chart 0 0 width 100)
+    (.draw dimple-chart)
+    ;(let [on-hover (fn [] (
+    ;                              ))]
+    ;  (.addEventListener (.getElementById js/document (str "#" id)) "onHover" on-hover))
+    ))
+
+  (render [this]
+    (let [{:keys [id width height]} (om/props this)]
+      (html
+        [:div {:id     id
+               :width  width
+               :height height
+               :style {
+                       :float "right"
+                       }}]))))
+
+
+(def pie-diagram (om/factory Pie-diagram))
+
+
+(def data [
+           {:hashtag "Clojure" :count 10},
+           {:hashtag "JVM" :count 20},
+           {:hashtag "JavaScript" :count 30},
+           {:hashtag "Golang" :count 40},
+           {:hashtag "Linux" :count 50},
+           {:hashtag "NoSQL" :count 10},
+           ])
+
 (defui Home
   Object
   (render [this]
@@ -13,6 +53,14 @@
           [:div.col-lg-12 {}
            [:h3 {} "Tech Radar helps you to be aware of modern trends in programming"]
            [:hr {}]
+           (pie-diagram {
+                         :id "pie"
+                         :width 300
+                         :height 300
+                         :data data
+                         :measure-axis "count"
+                         :series "hashtag"
+                         })
            [:h4 {} [:i.fa.fa-rocket {}] " Features"]
            [:p {} "This is a resource created specially for programmers."]
            [:span {} "With Tech Radar you can:"]
