@@ -81,8 +81,8 @@
   (let [e            (.getElementById js/document id)
         x            (.-clientWidth e)
         width-offset 30
-        height       640]
-    {:width (- x width-offset) :height height}))
+        height       (.-clientHeight (.-documentElement js/document))]
+    {:width (- x width-offset) :height (* height 0.87)}))
 
 (defui Chart
   Object
@@ -166,7 +166,7 @@
           :on-click #(set-trend-type trend-type)}
      [:a name]]))
 
-(defn- trend-item->name [trend]
+(defn- trend-item->trend-name [trend]
   (case trend
     :jobs "Jobs"
     :clojure "Clojure"
@@ -176,14 +176,31 @@
     :linux "Linux"
     :nosql "NoSQL"))
 
-(defn topic-item [trend current-trend set-current-trend]
-  (let [name (trend-item->name trend)]
-    [:li {:key      (str "topic-item-" name)
+
+(defn- trend-name->trend-item [name]
+  (case name
+    "Jobs" :jobs
+    "Clojure" :clojure
+    "JVM" :jvm
+    "JavaScript" :javascript
+    "Golang" :golang
+    "Linux" :linux
+    "NoSQL" :nosql))
+
+(defn trend-list-item [trend current-trend set-current-trend]
+  (let [name (trend-item->trend-name trend)]
+    [:li {:key      (str "trend-list-item-" name)
           :class    (if (= trend current-trend)
                       "active cursor"
                       "cursor")
           :on-click #(set-current-trend trend)}
      [:a name]]))
+
+(defn trend-select-item [trend current-trend]
+  (let [name (trend-item->trend-name trend)]
+    [:option {:key      (str "trend-select-item-" name)
+    :value name}
+    name]))
 
 (defui TrendsView
   static om/IQuery
@@ -198,16 +215,33 @@
          (if (seq trends)
            [:div
             [:div.row
-             [:div.col-lg-6
+             ;desktop
+             [:div.col-lg-6.fork-me-desktop
               [:div.text-center {}
                [:ul.pagination.no-borders {}
                 (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
-                     (mapv #(topic-item % current-trend set-current-trend)))]]]
-             [:div.col-lg-6
+                     (mapv #(trend-list-item % current-trend set-current-trend)))]]]
+             [:div.col-lg-6.fork-me-desktop
+              [:div.text-center {}
+               [:ul.pagination.no-borders {}
+                (->> [:daily :weekly :monthly]
+                     (mapv #(trend-item % trend-type set-trend-type)))]]]
+
+             ;mobile
+             [:div.col-xs-7.fork-me-mobile-wrapper
+              [:select.combobox.input-large.form-control {:on-change (fn [e]
+                                                                       (set-current-trend (-> e .-target .-value trend-name->trend-item)))
+                                                          }
+               (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
+                    (mapv #(trend-select-item % current-trend)))]]
+
+             [:div.col-xs-5.fork-me-mobile-wrapper
               [:div.text-center {}
                [:ul.pagination.no-borders {}
                 (->> [:daily :weekly :monthly]
                      (mapv #(trend-item % trend-type set-trend-type)))]]]]
+
+
             (chart-view (om/computed props {:trend-type    trend-type
                                             :current-trend current-trend}))]
            (message-view {:text "Loading trends, please wait."}))]))))
