@@ -9,27 +9,38 @@
     (let [{:keys [id data width height series measure-axis] } (om/props this)
     Chart          (.-chart js/dimple)
     svg            (.newSvg js/dimple (str "#" id) width height)
-    dimple-chart   (Chart. svg (clj->js data))
-    count-axis     (.addMeasureAxis dimple-chart "p" "count")]
-    (.addSeries dimple-chart series dimple.plot.pie )
-    (.draw dimple-chart)))
+
+    dimple-chart   (Chart. svg (clj->js data))]
+    (.addMeasureAxis dimple-chart "p" measure-axis)
+    (.addSeries dimple-chart series dimple.plot.pie)
+    (.addLegend dimple-chart 0 0 width 100)
+    (.draw dimple-chart)
+    ;(let [on-hover (fn [] (
+    ;                              ))]
+    ;  (.addEventListener (.getElementById js/document (str "#" id)) "onHover" on-hover))
+    ))
 
   (render [this]
     (let [{:keys [id width height]} (om/props this)]
       (html
         [:div {:id     id
                :width  width
-               :height height}]))))
+               :height height
+               :style {
+                       :float "right"
+                       }}]))))
+
 
 (def pie-diagram (om/factory Pie-diagram))
 
 
 (def data [
-           {:hashtag ".net1" :count 10},
-           {:hashtag ".net2" :count 20},
-           {:hashtag ".net3" :count 30},
-           {:hashtag ".net4" :count 40},
-           {:hashtag ".net5" :count 50},
+           {:hashtag "Clojure" :count 10},
+           {:hashtag "JVM" :count 20},
+           {:hashtag "JavaScript" :count 30},
+           {:hashtag "Golang" :count 40},
+           {:hashtag "Linux" :count 50},
+           {:hashtag "NoSQL" :count 10},
            ])
 
 (defui Home
@@ -38,18 +49,18 @@
     (html
       (let [props (om/props this)]
         [:div.container-fluid
-         (pie-diagram {
-                       :id "pie"
-                       :width 200
-                       :height 200
-                       :data data
-                       :measure-axis "count"
-                       :series "hashtag"
-                       })
          [:div.row {}
           [:div.col-lg-12 {}
            [:h3 {} "Tech Radar helps you to be aware of modern trends in programming"]
            [:hr {}]
+           (pie-diagram {
+                         :id "pie"
+                         :width 300
+                         :height 300
+                         :data data
+                         :measure-axis "count"
+                         :series "hashtag"
+                         })
            [:h4 {} [:i.fa.fa-rocket {}] " Features"]
            [:p {} "This is a resource created specially for programmers."]
            [:span {} "With Tech Radar you can:"]
