@@ -137,20 +137,17 @@
 
 (def chart-view (om/factory ChartView))
 
-(defn- trend-type->name [type]
+(defn- trend-type->trend-type-name [type]
   (case type
     :daily "Daily"
     :weekly "Weekly"
     :monthly "Monthly"))
 
-(defn trend-item [trend-type current-trend-type set-trend-type]
-  (let [name (trend-type->name trend-type)]
-    [:li {:key      (str "page-" name)
-          :class    (if (= trend-type current-trend-type)
-                      "active cursor"
-                      "cursor")
-          :on-click #(set-trend-type trend-type)}
-     [:a name]]))
+(defn- trend-type-name->trend-type [name]
+  (case name
+    "Daily" :daily
+    "Weekly" :weekly
+    "Monthly" :monthly))
 
 (defn- trend-item->trend-name [trend]
   (case trend
@@ -162,7 +159,6 @@
     :linux "Linux"
     :nosql "NoSQL"))
 
-
 (defn- trend-name->trend-item [name]
   (case name
     "Jobs" :jobs
@@ -172,6 +168,22 @@
     "Golang" :golang
     "Linux" :linux
     "NoSQL" :nosql))
+
+
+(defn trend-type-list-item [trend-type current-trend-type set-trend-type]
+  (let [name (trend-type->trend-type-name trend-type)]
+    [:li {:key      (str "page-" name)
+          :class    (if (= trend-type current-trend-type)
+                      "active cursor"
+                      "cursor")
+          :on-click #(set-trend-type trend-type)}
+     [:a name]]))
+
+(defn trend-type-select-item [trend-type current-trend-type]
+  (let [name (trend-type->trend-type-name trend-type)]
+    [:option {:key      (str "page-" name)
+          :value name}
+     name]))
 
 (defn trend-list-item [trend current-trend set-current-trend]
   (let [name (trend-item->trend-name trend)]
@@ -211,7 +223,7 @@
               [:div.text-center {}
                [:ul.pagination.no-borders {}
                 (->> [:daily :weekly :monthly]
-                     (mapv #(trend-item % trend-type set-trend-type)))]]]
+                     (mapv #(trend-type-list-item % trend-type set-trend-type)))]]]
 
              ;mobile
              [:div.col-xs-7.fork-me-mobile-wrapper
@@ -222,11 +234,11 @@
                     (mapv #(trend-select-item % current-trend)))]]
 
              [:div.col-xs-5.fork-me-mobile-wrapper
-              [:div.text-center {}
-               [:ul.pagination.no-borders {}
-                (->> [:daily :weekly :monthly]
-                     (mapv #(trend-item % trend-type set-trend-type)))]]]]
-
+              [:select.combobox.input-large.form-control {:on-change (fn [e]
+                                                                       (set-trend-type (-> e .-target .-value trend-type-name->trend-type)))
+                                                          }
+               (->> [:daily :weekly :monthly]
+                    (mapv #(trend-type-select-item % trend-type)))]]]
 
             (chart-view (om/computed props {:trend-type    trend-type
                                             :current-trend current-trend}))]
