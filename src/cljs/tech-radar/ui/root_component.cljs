@@ -30,7 +30,9 @@
   (render [this]
     (let [{:keys [settings current-screen current-topic state]} (om/props this)]
       (html
-        [:div#wrapper {}
+        [:div#wrapper {
+                       :class (if (not (or (= current-screen :home) (= current-screen :trends))) "top-shifted" "")
+                       }
          (nav-bar (om/computed settings
                                {:current-screen current-screen
                                 :current-topic  current-topic}))
