@@ -76,9 +76,9 @@
                            :statistic-fn (fn []
                                            [{:hashtag "Clojure" :count 10}
                                             {:hashtag "JVM" :count 20}
-                                            {:hashtag "JavaScript" :count 30}
+                                            {:hashtag "JavaScript" :count 300}
                                             {:hashtag "Golang" :count 40}
-                                            {:hashtag "Linux" :count 50}
+                                            {:hashtag "Linux" :count 100}
                                             {:hashtag "NoSQL" :count 10}])
                            :trends-fn (fn []
                                         (get-cached-trends cache))
