@@ -73,6 +73,13 @@
                                                          :cache-update-timeout-s cache-update-timeout-s})]
           (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
                            :stop-cache-update-fn stop-cache-update-fn
+                           :statistic-fn (fn []
+                                           [{:hashtag "Clojure" :count 10}
+                                            {:hashtag "JVM" :count 20}
+                                            {:hashtag "JavaScript" :count 30}
+                                            {:hashtag "Golang" :count 40}
+                                            {:hashtag "Linux" :count 50}
+                                            {:hashtag "NoSQL" :count 10}])
                            :trends-fn (fn []
                                         (get-cached-trends cache))
                            :texts-fn (fn [topic]

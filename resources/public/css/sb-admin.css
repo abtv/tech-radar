@@ -367,3 +367,7 @@ ul.alert-dropdown {
 .fork-me-mobile:active {
     color: red;
 }
+
+.pie-diagram {
+    float: right;
+}

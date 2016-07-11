@@ -50,14 +50,14 @@
         svg            (.newSvg js/dimple (str "#" id) width height)
         dimple-chart   (.setMargins (Chart. svg (clj->js data)) (:left margins) (:top margins) (:right margins) (:bottom margins))
         count-axis     (.addMeasureAxis dimple-chart "x" x-axis)
-        hash-tags-axis (.addCategoryAxis dimple-chart "y" y-axis)
-        series         (.addSeries dimple-chart "" plot (clj->js [count-axis hash-tags-axis]))]
+        hash-tags-axis (.addCategoryAxis dimple-chart "y" y-axis)]
+    (.addSeries dimple-chart "" plot (clj->js [count-axis hash-tags-axis]))
 
     (when (not= (count data) 0)
-      (let [ count-tick (validate-count (max-count data) )]
-        (set!  (.-ticks count-axis)  count-tick)))
+      (let [count-tick (validate-count (max-count data))]
+        (set! (.-ticks count-axis) count-tick)))
 
-    (.addOrderRule hash-tags-axis  x-axis false)
+    (.addOrderRule hash-tags-axis x-axis false)
     (.draw dimple-chart)
     (.text (.-titleShape count-axis) name)
     (.text (.-titleShape hash-tags-axis) "")
@@ -195,8 +195,8 @@
 
 (defn trend-type-select-item [trend-type current-trend-type]
   (let [name (trend-type->trend-type-name trend-type)]
-    [:option {:key      (str "page-" name)
-          :value name}
+    [:option {:key   (str "page-" name)
+              :value name}
      name]))
 
 (defn trend-list-item [trend current-trend set-current-trend]
@@ -210,9 +210,9 @@
 
 (defn trend-select-item [trend current-trend]
   (let [name (trend-item->trend-name trend)]
-    [:option {:key      (str "trend-select-item-" name)
-    :value name}
-    name]))
+    [:option {:key   (str "trend-select-item-" name)
+              :value name}
+     name]))
 
 (defui TrendsView
   static om/IQuery

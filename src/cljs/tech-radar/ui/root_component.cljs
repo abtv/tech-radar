@@ -18,6 +18,7 @@
       :current-screen                                       ; Required for dispatching main view
       :current-topic                                        ; For mixing
       :state                                                ; Because TopicView & TrendsView required full state
+      :statistic
       ])
   Object
   (set-page-number [this cnt]
@@ -28,17 +29,17 @@
     (om/transact! this `[(current-trend/set {:current-trend ~current-trend}) [:settings]]))
 
   (render [this]
-    (let [{:keys [settings current-screen current-topic state]} (om/props this)]
+    (let [{:keys [settings current-screen current-topic statistic state]} (om/props this)]
       (html
-        [:div#wrapper {
-                       :class (if (not (or (= current-screen :home) (= current-screen :trends))) "top-shifted" "")
-                       }
+        [:div#wrapper {:class (when-not (or (= current-screen :home)
+                                            (= current-screen :trends))
+                                "top-shifted")}
          (nav-bar (om/computed settings
                                {:current-screen current-screen
                                 :current-topic  current-topic}))
          [:div#page-wrapper {}
           (condp = current-screen
-            :home (home state)
+            :home (home (om/computed {} {:statistic statistic}))
             :trends (trends-view (om/computed state {:set-trend-type    #(.set-trend-type this %)
                                                      :set-current-trend #(.set-current-trend this %)}))
             (topic-view (om/computed state

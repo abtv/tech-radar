@@ -3,7 +3,7 @@
             [sablono.core :refer-macros [html]]
             [tech-radar.ui.message-view :refer [message-view]]))
 
-(defui Pie-diagram
+(defui PieDiagram
   Object
   (componentDidMount [this]
     (let [{:keys [id data width height series measure-axis]} (om/props this)
@@ -11,51 +11,42 @@
           svg          (.newSvg js/dimple (str "#" id) width height)
           dimple-chart (Chart. svg (clj->js data))]
       (.addMeasureAxis dimple-chart "p" measure-axis)
-      (.addSeries dimple-chart series (-> js/dimple .-plot .-pie))
-      (.addLegend dimple-chart 0 0 width 100)
-      (.draw dimple-chart)
-      ;(let [on-hover (fn [] (
-      ;                              ))]
-      ;  (.addEventListener (.getElementById js/document (str "#" id)) "onHover" on-hover))
-      ))
-
+      (.addSeries dimple-chart series (-> js/dimple
+                                          .-plot
+                                          .-pie))
+      (.addLegend dimple-chart 0 4 width 100)
+      (.draw dimple-chart)))
+  (componentWillUnmount [this]
+    (let [{:keys [id]} (om/props this)]
+      (let [n (.getElementById js/document id)]
+        (while (.hasChildNodes n)
+          (.removeChild n (.-lastChild n))))))
   (render [this]
     (let [{:keys [id width height]} (om/props this)]
       (html
-        [:div {:id     id
-               :width  width
-               :height height
-               :style  {:float "right"}}]))))
+        [:div.pie-diagram {:id     id
+                           :width  width
+                           :height height}]))))
 
-
-(def pie-diagram (om/factory Pie-diagram))
-
-
-(def data [{:hashtag "Clojure" :count 10}
-           {:hashtag "JVM" :count 20}
-           {:hashtag "JavaScript" :count 30}
-           {:hashtag "Golang" :count 40}
-           {:hashtag "Linux" :count 50}
-           {:hashtag "NoSQL" :count 10}])
+(def pie-diagram (om/factory PieDiagram))
 
 (defui Home
   Object
   (render [this]
     (html
-      (let [props (om/props this)]
+      (let [{:keys [statistic]} (om/get-computed this)]
         [:div.container-fluid
          [:div.row {}
           [:div.col-lg-12 {}
            [:h3 {} "Tech Radar helps you to be aware of modern trends in programming"]
            [:hr {}]
-           (pie-diagram {
-                         :id           "pie"
-                         :width        300
-                         :height       300
-                         :data         data
-                         :measure-axis "count"
-                         :series       "hashtag"
-                         })
+           (when (seq statistic)
+             (pie-diagram {:id           "pie"
+                           :width        300
+                           :height       300
+                           :data         statistic
+                           :measure-axis "count"
+                           :series       "hashtag"}))
            [:h4 {} [:i.fa.fa-rocket {}] " Features"]
            [:p {} "This is a resource created specially for programmers."]
            [:span {} "With Tech Radar you can:"]
