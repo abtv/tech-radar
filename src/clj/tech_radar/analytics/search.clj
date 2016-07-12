@@ -20,7 +20,9 @@
                                  (update-in search [:index topic word] conj-ids)) search topics))]
     (reduce words-reduce search words)))
 
-(defn add-text [search {:keys [id text topics] :as orig}]
+(defn add-text [search {:keys [id text topics] :as orig} statistic]
+  (doseq [topic topics]
+    (swap! statistic update-in [topic] (fnil inc 0)))
   (let [words (get-words text)]
     (swap! search (fn [search]
                     (-> search
@@ -91,7 +93,7 @@
      :latest      (:created-at first-text)
      :newest      (:created-at last-text)}))
 
-(defn remove-oldest-item [search]
+(defn remove-oldest-item [search statistic]
   (let [dsearch     @search
         words       (-> (:texts dsearch)
                         (first)

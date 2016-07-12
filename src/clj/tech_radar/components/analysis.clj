@@ -14,10 +14,7 @@
             [tech-radar.analytics.model :refer [new-model]]
             [tech-radar.analytics.cache :refer [new-cache
                                                 get-cached-trends]]
-            [tech-radar.analytics.protocols :refer [init
-                                                    texts
-                                                    search
-                                                    index-info]]))
+            [tech-radar.analytics.protocols :as protocols]))
 
 (defn- get-settings []
   {:max-hashtags-per-trend (-> env
@@ -58,7 +55,7 @@
                                                            :max-tweet-count         max-tweet-count
                                                            :hashtag-filter-settings hashtag-filter-settings})
               _                       (do
-                                        (init model initial-data)
+                                        (protocols/init model initial-data)
                                         (cache-update-fn model cache)
                                         (run-model-update {:model         model
                                                            :analysis-chan analysis-chan
@@ -74,20 +71,15 @@
           (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
                            :stop-cache-update-fn stop-cache-update-fn
                            :statistic-fn (fn []
-                                           [{:hashtag "Clojure" :count 10}
-                                            {:hashtag "JVM" :count 20}
-                                            {:hashtag "JavaScript" :count 300}
-                                            {:hashtag "Golang" :count 40}
-                                            {:hashtag "Linux" :count 100}
-                                            {:hashtag "NoSQL" :count 10}])
+                                           (protocols/statistic model))
                            :trends-fn (fn []
                                         (get-cached-trends cache))
                            :texts-fn (fn [topic]
-                                       (texts model topic))
+                                       (protocols/texts model topic))
                            :search-fn (fn [topic text]
-                                        (search model topic text))
+                                        (protocols/search model topic text))
                            :index-info-fn (fn []
-                                            (index-info model)))))))
+                                            (protocols/index-info model)))))))
   (stop [component]
     (when stop-cache-update-fn
       (timbre/info "Stopping analysis")

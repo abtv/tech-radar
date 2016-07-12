@@ -4,7 +4,8 @@
   (search [this topic text])
   (index-info [this])
   (trends [this])
-  (texts [this topic]))
+  (texts [this topic])
+  (statistic [this]))
 
 (defprotocol Storage
   (init [this initial-data])
