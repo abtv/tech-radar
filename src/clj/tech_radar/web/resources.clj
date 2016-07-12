@@ -3,6 +3,11 @@
                                                 get-resource
                                                 post-resource]]))
 
+(defn statistic-resource [{:keys [statistic-fn] :as analysis}]
+  (resource-handler get-resource
+    :handle-ok (fn [ctx]
+                 (statistic-fn))))
+
 (defn trends-resource [{:keys [trends-fn] :as analysis}]
   (resource-handler get-resource
     :handle-ok (fn [ctx]

@@ -30,6 +30,7 @@
                  [com.twitter/hbc-core "2.2.0"]
                  [org.omcljs/om "1.0.0-alpha37"]
                  [sablono "0.6.2"]
+                 [org.apache.httpcomponents/httpclient "4.5.2"]
                  [cljs-ajax "0.5.4"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [secretary "1.2.3"]
@@ -70,7 +71,7 @@
                              :cache-update-timeout-s  "10"
                              :max-hashtags-per-trend  "25"
                              :max-texts-per-request   "200"
-                             :max-tweet-count         "500000"
+                             :max-tweet-count         "100000"
                              :metrics-timeout-s       "100"
                              :log-path                "./logs/tech-radar.log"
                              :max-log-size-mb         "1"

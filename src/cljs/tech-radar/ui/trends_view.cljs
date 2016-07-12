@@ -36,18 +36,32 @@
   (on-hashtag-click :linux)
   (on-hashtag-click :nosql))
 
+(defn max-count [hashtag-count]
+  (apply max (mapv #(:count %) hashtag-count)))
+
+(defn validate-count [count]
+  "Calculate count ticks"
+  (let [max-tick 20]
+    (min max-tick count)))
+
 (defn- draw-chart [data {:keys [id width height chart]}]
   (let [{:keys [bounds margins plot x-axis y-axis name]} chart
-        Chart        (.-chart js/dimple)
-        svg          (.newSvg js/dimple (str "#" id) width height)
-        dimple-chart (.setMargins (Chart. svg) (:left margins) (:top margins) (:right margins) (:bottom margins))
-        x            (.addMeasureAxis dimple-chart "x" x-axis)
-        y            (.addCategoryAxis dimple-chart "y" y-axis)
-        s            (.addSeries dimple-chart "" plot (clj->js [x y]))]
-    (aset s "data" (clj->js data))
+        Chart          (.-chart js/dimple)
+        svg            (.newSvg js/dimple (str "#" id) width height)
+        dimple-chart   (.setMargins (Chart. svg (clj->js data)) (:left margins) (:top margins) (:right margins) (:bottom margins))
+        count-axis     (.addMeasureAxis dimple-chart "x" x-axis)
+        hash-tags-axis (.addCategoryAxis dimple-chart "y" y-axis)]
+    (.addSeries dimple-chart "" plot (clj->js [count-axis hash-tags-axis]))
+
+    (when (not= (count data) 0)
+      (let [count-tick (validate-count (max-count data))]
+        (set! (.-ticks count-axis) count-tick)))
+
+    (.addOrderRule hash-tags-axis x-axis false)
     (.draw dimple-chart)
-    (.text (.-titleShape x) name)
-    (.text (.-titleShape y) "")
+    (.text (.-titleShape count-axis) name)
+    (.text (.-titleShape hash-tags-axis) "")
+
     (set-hashtag-click)))
 
 (defn- new-chart-params [{:keys [id name width height]}]
@@ -67,8 +81,8 @@
   (let [e            (.getElementById js/document id)
         x            (.-clientWidth e)
         width-offset 30
-        height       640]
-    {:width (- x width-offset) :height height}))
+        height       (.-clientHeight (.-documentElement js/document))]
+    {:width (- x width-offset) :height (* height 0.87)}))
 
 (defui Chart
   Object
@@ -137,22 +151,19 @@
 
 (def chart-view (om/factory ChartView))
 
-(defn- trend-type->name [type]
+(defn- trend-type->trend-type-name [type]
   (case type
     :daily "Daily"
     :weekly "Weekly"
     :monthly "Monthly"))
 
-(defn trend-item [trend-type current-trend-type set-trend-type]
-  (let [name (trend-type->name trend-type)]
-    [:li {:key      (str "page-" name)
-          :class    (if (= trend-type current-trend-type)
-                      "active cursor"
-                      "cursor")
-          :on-click #(set-trend-type trend-type)}
-     [:a name]]))
+(defn- trend-type-name->trend-type [name]
+  (case name
+    "Daily" :daily
+    "Weekly" :weekly
+    "Monthly" :monthly))
 
-(defn- trend-item->name [trend]
+(defn- trend-item->trend-name [trend]
   (case trend
     :jobs "Jobs"
     :clojure "Clojure"
@@ -162,14 +173,46 @@
     :linux "Linux"
     :nosql "NoSQL"))
 
-(defn topic-item [trend current-trend set-current-trend]
-  (let [name (trend-item->name trend)]
-    [:li {:key      (str "topic-item-" name)
+(defn- trend-name->trend-item [name]
+  (case name
+    "Jobs" :jobs
+    "Clojure" :clojure
+    "JVM" :jvm
+    "JavaScript" :javascript
+    "Golang" :golang
+    "Linux" :linux
+    "NoSQL" :nosql))
+
+
+(defn trend-type-list-item [trend-type current-trend-type set-trend-type]
+  (let [name (trend-type->trend-type-name trend-type)]
+    [:li {:key      (str "page-" name)
+          :class    (if (= trend-type current-trend-type)
+                      "active cursor"
+                      "cursor")
+          :on-click #(set-trend-type trend-type)}
+     [:a name]]))
+
+(defn trend-type-select-item [trend-type current-trend-type]
+  (let [name (trend-type->trend-type-name trend-type)]
+    [:option {:key   (str "page-" name)
+              :value name}
+     name]))
+
+(defn trend-list-item [trend current-trend set-current-trend]
+  (let [name (trend-item->trend-name trend)]
+    [:li {:key      (str "trend-list-item-" name)
           :class    (if (= trend current-trend)
                       "active cursor"
                       "cursor")
           :on-click #(set-current-trend trend)}
      [:a name]]))
+
+(defn trend-select-item [trend current-trend]
+  (let [name (trend-item->trend-name trend)]
+    [:option {:key   (str "trend-select-item-" name)
+              :value name}
+     name]))
 
 (defui TrendsView
   static om/IQuery
@@ -184,16 +227,33 @@
          (if (seq trends)
            [:div
             [:div.row
-             [:div.col-lg-6
+             ;desktop
+             [:div.col-lg-6.fork-me-desktop
               [:div.text-center {}
                [:ul.pagination.no-borders {}
                 (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
-                     (mapv #(topic-item % current-trend set-current-trend)))]]]
-             [:div.col-lg-6
+                     (mapv #(trend-list-item % current-trend set-current-trend)))]]]
+             [:div.col-lg-6.fork-me-desktop
               [:div.text-center {}
                [:ul.pagination.no-borders {}
                 (->> [:daily :weekly :monthly]
-                     (mapv #(trend-item % trend-type set-trend-type)))]]]]
+                     (mapv #(trend-type-list-item % trend-type set-trend-type)))]]]
+
+             ;mobile
+             [:div.col-xs-7.fork-me-mobile-wrapper
+              [:select.combobox.input-large.form-control {:on-change (fn [e]
+                                                                       (set-current-trend (-> e .-target .-value trend-name->trend-item)))
+                                                          }
+               (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
+                    (mapv #(trend-select-item % current-trend)))]]
+
+             [:div.col-xs-5.fork-me-mobile-wrapper
+              [:select.combobox.input-large.form-control {:on-change (fn [e]
+                                                                       (set-trend-type (-> e .-target .-value trend-type-name->trend-type)))
+                                                          }
+               (->> [:daily :weekly :monthly]
+                    (mapv #(trend-type-select-item % trend-type)))]]]
+
             (chart-view (om/computed props {:trend-type    trend-type
                                             :current-trend current-trend}))]
            (message-view {:text "Loading trends, please wait."}))]))))

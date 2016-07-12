@@ -1,22 +1,21 @@
 (ns tech-radar.web.web-server
   (:require [bidi.bidi :as bidi]
             [bidi.ring :as bidi-ring]
-            [tech-radar.web.resources :refer [trends-resource
-                                              topic-resource
-                                              search-resource
-                                              index-resource]]
+            [tech-radar.web.resources :as resources]
             [taoensso.timbre :as timbre]
             [ring.util.response :refer [charset]]))
 
 (defn- create-resources [analysis]
-  {:trends (trends-resource analysis)
-   :topics (topic-resource analysis)
-   :search (search-resource analysis)
-   :index  (index-resource analysis)})
+  {:statistic (resources/statistic-resource analysis)
+   :trends    (resources/trends-resource analysis)
+   :topics    (resources/topic-resource analysis)
+   :search    (resources/search-resource analysis)
+   :index     (resources/index-resource analysis)})
 
 (def get-routes {"trends"           :trends
                  ["topics/" :topic] :topics
-                 "index"            :index})
+                 "index"            :index
+                 "statistic"        :statistic})
 
 (def post-routes {["search/" :topic] :search})
 

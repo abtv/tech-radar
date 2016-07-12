@@ -70,20 +70,21 @@
     (loop [tweet  (-> (first xs)
                       (to-tweet))
            xs     (next xs)
-           tweets []]
+           tweets (transient [])]
       (let [x (first xs)]
         (cond
-          (nil? x) (conj tweets tweet)
+          (nil? x) (-> (conj! tweets tweet)
+                       (persistent!))
           (= (:id tweet) (:id x)) (recur (update-in tweet [:topics] conj (-> (:topic x)
                                                                              (keyword)))
                                          (next xs)
                                          tweets)
           :else (recur (to-tweet x)
                        (next xs)
-                       (conj tweets tweet)))))))
+                       (conj! tweets tweet)))))))
 
 (defn load-tweets [database max-record-count]
-  (let [tweets-query* (tweets-query max-record-count)]
-    (->> (jdbc/query database tweets-query* :identifiers to-dashes)
-         (reverse)
-         (join-to-tweets))))
+  (let [tweets-query* (tweets-query max-record-count)
+        tweets        (jdbc/query database tweets-query* :identifiers to-dashes)]
+    (-> (reverse tweets)
+        (join-to-tweets))))

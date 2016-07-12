@@ -7,7 +7,7 @@
 /* Global Styles */
 
 #app {
-    margin-top: 100px;
+    margin-top: 50px;
     background-color: #222;
 }
 
@@ -15,9 +15,13 @@
     height: 50px;
 }
 
-@media(min-width:768px) {
-    #app {
-        margin-top: 50px;
+.combobox {
+    margin: 5px;
+}
+
+@media(max-width:768px) {
+    .top-shifted {
+        margin-top: 100px;
     }
 }
 
@@ -362,4 +366,8 @@ ul.alert-dropdown {
 
 .fork-me-mobile:active {
     color: red;
+}
+
+.pie-diagram {
+    float: right;
 }

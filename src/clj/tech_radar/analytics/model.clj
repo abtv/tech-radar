@@ -56,17 +56,17 @@
                 [topic (get-top-hashtags max-hashtags-per-trend hashtags)]))
          (into {}))))
 
-(defn- add-tweets [search tweets]
+(defn- add-tweets [search tweets statistic]
   (doseq [tweet tweets]
-    (add-text search tweet)))
+    (add-text search tweet statistic)))
 
-(defrecord Model [data search settings topics]
+(defrecord Model [data search settings topics statistic]
   Storage
   (init [this initial-data]
-    (let [{:keys [data search]} this
+    (let [{:keys [data search statistic]} this
           {:keys [topics tweets]} initial-data]
       (reset! data topics)
-      (add-tweets search tweets))
+      (add-tweets search tweets statistic))
     nil)
   (reset-trends [this hashtags-type hashtags]
     (doseq [[topic hashtags] hashtags]
@@ -74,17 +74,25 @@
     nil)
   Tweet
   (add [this tweet]
-    (let [{:keys [data search]} this
+    (let [{:keys [data search statistic]} this
           {:keys [max-texts-per-request max-tweet-count hashtag-filter-settings]} (:settings this)]
       (add* data tweet max-texts-per-request hashtag-filter-settings)
-      (add-text search tweet)
+      (add-text search tweet statistic)
       (let [texts-count (-> @search
                             (:texts)
                             (count))]
         (when (> texts-count max-tweet-count)
-          (remove-oldest-item search))))
+          (remove-oldest-item search statistic))))
     nil)
   Analyze
+  (statistic [this]
+    (->> (:statistic this)
+         (deref)
+         (map (fn [[k v]]
+                {:hashtag k
+                 :count   v}))
+         (sort-by :hashtag)
+         (into [])))
   (search [this topic text]
     (search-texts (:search this) topic text))
   (index-info [this]
@@ -117,7 +125,8 @@
     (when-not hashtag-filter-settings
       (throw (Exception. "you have to provide hashtag-filter-settings param")))
 
-    (map->Model {:data     (atom {})
-                 :search   (new-search)
-                 :settings (assoc settings :hashtag-filter-settings (lowercase-settings hashtag-filter-settings))
-                 :topics   topics})))
+    (map->Model {:data      (atom {})
+                 :search    (new-search)
+                 :settings  (assoc settings :hashtag-filter-settings (lowercase-settings hashtag-filter-settings))
+                 :topics    topics
+                 :statistic (atom {})})))

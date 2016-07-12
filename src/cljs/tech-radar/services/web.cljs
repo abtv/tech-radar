@@ -4,8 +4,8 @@
             [ajax.core :as clj-ajax]
             [cemerick.url :refer [url-encode]]))
 
-;(def base-url "http://localhost:3000/")
-(def base-url "http://193.124.179.227:3000/")
+(def base-url "http://localhost:3000/")
+;(def base-url "http://193.124.179.227:3000/")
 
 (defn ajax-request [method url & {:as params}]
   (let [url            (str base-url url)
@@ -20,6 +20,14 @@
 
 (defmulti web (fn [id params]
                 id))
+
+(defmethod web :statistic/get
+  [id params]
+  (go (let [url      "statistic"
+            response (<! (ajax-request :get url))]
+        (if (:error response)
+          []
+          response))))
 
 (defmethod web :trends/get
   [id params]

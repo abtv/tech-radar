@@ -24,11 +24,12 @@
         t4         {:id         4
                     :text       "very good text"
                     :twitter-id 400
-                    :created-at created-at}]
-    (add-text search (assoc t1 :topics #{:cool}))
-    (add-text search (assoc t2 :topics #{:cool}))
-    (add-text search (assoc t3 :topics #{:very :bad}))
-    (add-text search (assoc t4 :topics #{:very :good}))
+                    :created-at created-at}
+        statistic  (atom {})]
+    (add-text search (assoc t1 :topics #{:cool}) statistic)
+    (add-text search (assoc t2 :topics #{:cool}) statistic)
+    (add-text search (assoc t3 :topics #{:very :bad}) statistic)
+    (add-text search (assoc t4 :topics #{:very :good}) statistic)
     (is (= (into (sorted-map) {1 (dissoc t1 :id)
                                2 (dissoc t2 :id)
                                3 (dissoc t3 :id)
@@ -85,12 +86,13 @@
         t4         {:id         4
                     :text       "very good text"
                     :twitter-id 400
-                    :created-at created-at}]
-    (add-text search (assoc t1 :topics #{:cool}))
-    (add-text search (assoc t2 :topics #{:cool}))
-    (add-text search (assoc t3 :topics #{:very :bad}))
-    (add-text search (assoc t4 :topics #{:very :good}))
-    (remove-oldest-item search)
+                    :created-at created-at}
+        statistic  (atom {})]
+    (add-text search (assoc t1 :topics #{:cool}) statistic)
+    (add-text search (assoc t2 :topics #{:cool}) statistic)
+    (add-text search (assoc t3 :topics #{:very :bad}) statistic)
+    (add-text search (assoc t4 :topics #{:very :good}) statistic)
+    (remove-oldest-item search statistic)
     (is (= (into (sorted-map) {2 (dissoc t2 :id)
                                3 (dissoc t3 :id)
                                4 (dissoc t4 :id)})
@@ -116,7 +118,8 @@
         t1         {:id         1
                     :text       "a word can occur more than one time, but search results should contain only one record per relevant text"
                     :twitter-id 100
-                    :created-at created-at}]
-    (add-text search (assoc t1 :topics #{:cool}))
+                    :created-at created-at}
+        statistic  (atom {})]
+    (add-text search (assoc t1 :topics #{:cool}) statistic)
     (is (= {:total 1
             :texts [t1]} (search-texts search :cool "one")))))

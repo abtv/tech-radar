@@ -34,12 +34,14 @@
     (throw (Exception. "you have to provide max-tweet-count param")))
   (when-not max-texts-per-request
     (throw (Exception. "you have to provide max-texts-per-request param")))
-  {:topics (reduce (fn [data topic]
-                     (->> (load-topic database {:topic            topic
-                                                :max-record-count max-texts-per-request
-                                                :hashtag-filter   (topic hashtag-filter-settings)})
-                          (assoc data topic))) {} topics)
-   :tweets (load-tweets database max-tweet-count)})
+  (let [topics (reduce (fn [data topic]
+                         (->> (load-topic database {:topic            topic
+                                                    :max-record-count max-texts-per-request
+                                                    :hashtag-filter   (topic hashtag-filter-settings)})
+                              (assoc data topic))) {} topics)
+        tweets (load-tweets database max-tweet-count)]
+    {:topics topics
+     :tweets tweets}))
 
 (defmulti load-hashtags (fn [type {:keys [database topic hashtag-filter]}]
                           type))
