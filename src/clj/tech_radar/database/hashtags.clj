@@ -44,16 +44,16 @@
        (into {})))
 
 (defn- load-hashtags* [database {:keys [topic offset-back max-hashtags hashtag-filter]}]
-  (let [from                  (-> (local/local-now)
-                                  (time/minus offset-back)
-                                  (to-sql-time))
-        to                    (-> (local/local-now)
-                                  (to-sql-time))
-        hashtags-daily-query* (hashtags-query {:topic        topic
-                                               :from         from
-                                               :to           to
-                                               :max-hashtags (+ max-hashtags (* 10 (count hashtag-filter)))})]
-    (->> (jdbc/query database hashtags-daily-query* :identifiers to-dashes)
+  (let [from            (-> (local/local-now)
+                            (time/minus offset-back)
+                            (to-sql-time))
+        to              (-> (local/local-now)
+                            (to-sql-time))
+        hashtags-query* (hashtags-query {:topic        topic
+                                         :from         from
+                                         :to           to
+                                         :max-hashtags (+ max-hashtags (* 10 (count hashtag-filter)))})]
+    (->> (jdbc/query database hashtags-query* :identifiers to-dashes)
          (map (fn [{:keys [hashtag count]}]
                 [(.toLowerCase hashtag) count]))
          (reduce (fn [coll [hashtag count]]

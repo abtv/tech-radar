@@ -83,7 +83,7 @@
                        (conj tweets tweet)))))))
 
 (defn load-tweets [database max-record-count]
-  (let [tweets-query* (tweets-query max-record-count)]
-    (->> (jdbc/query database tweets-query* :identifiers to-dashes)
-         (reverse)
-         (join-to-tweets))))
+  (let [tweets-query* (tweets-query max-record-count)
+        tweets        (jdbc/query database tweets-query* :identifiers to-dashes)]
+    (-> (reverse tweets)
+        (join-to-tweets))))
