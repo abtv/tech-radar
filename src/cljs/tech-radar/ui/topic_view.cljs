@@ -80,7 +80,7 @@
 (defui TableView
   Object
   (render [this]
-    (let [{:keys [texts records-per-page page-number]} (om/get-computed this)]
+    (let [{:keys [texts]} (om/get-computed this)]
       (html
         [:div {:class "table-responsive"}
          [:table {:class "table table-bordered table-hover table-striped"}
@@ -89,10 +89,7 @@
             [:th {:class "text-center"} "Time"]
             [:th {:class "text-center"} "Text"]]]
           [:tbody
-           (->> texts
-                (drop (* (dec page-number) records-per-page))
-                (take records-per-page)
-                (mapv topic-item))]]]))))
+           (mapv topic-item texts)]]]))))
 
 (def table-view (om/factory TableView))
 
@@ -161,9 +158,11 @@
                          :set-page-number  set-page-number})
            (if texts
              (if (seq texts)
-               (table-view (om/computed {} {:texts            texts
-                                            :records-per-page records-per-page
-                                            :page-number      page-number}))
+               (let [page-texts (->> texts
+                                     (drop (* (dec page-number) records-per-page))
+                                     (take records-per-page)
+                                     (into []))]
+                 (table-view (om/computed {} {:texts page-texts})))
                (message-view {:text "No records found for your request."}))
              (message-view {:text "Loading texts, please wait."}))]]]))))
 

@@ -4,7 +4,8 @@
             [tech-radar.ui.message-view :refer [message-view]]
             [tech-radar.state :refer [app-state]]
             [tech-radar.history :refer [navigate-to-url!]]
-            [tech-radar.services.search :refer [make-search]]))
+            [tech-radar.services.search :refer [make-search]]
+            [tech-radar.ui.topic-view :as topic-view]))
 
 (defn- on-hashtag-click [topic]
   (let [all-rects    (.selectAll js/d3 (str "#" (name topic) " rect"))
@@ -253,9 +254,12 @@
                                                           }
                (->> [:daily :weekly :monthly]
                     (mapv #(trend-type-select-item % trend-type)))]]]
-
-            (chart-view (om/computed props {:trend-type    trend-type
-                                            :current-trend current-trend}))]
+            [:div.row
+             [:div.col-lg-6
+              (topic-view/table-view (om/computed {} {:texts []}))]
+             [:div.col-lg-6
+              (chart-view (om/computed props {:trend-type    trend-type
+                                              :current-trend current-trend}))]]]
            (message-view {:text "Loading trends, please wait."}))]))))
 
 (def trends-view (om/factory TrendsView))
