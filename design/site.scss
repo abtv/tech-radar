@@ -27,27 +27,25 @@
 
 #wrapper {
     padding-left: 0;
+
+    @media(min-width:768px){
+        padding-left: 171px;
+    }
 }
 
 #page-wrapper {
     width: 100%;
     padding: 0;
     background-color: #fff;
+
+    @media(min-width:768px){
+        padding: 10px;
+    }
 }
 
 .huge {
     font-size: 50px;
     line-height: normal;
-}
-
-@media(min-width:768px) {
-    #wrapper {
-        padding-left: 171px;
-    }
-
-    #page-wrapper {
-        padding: 10px;
-    }
 }
 
 /* Top Navigation */
@@ -303,28 +301,24 @@ ul.alert-dropdown {
 
 .desktop-time {
     display: block;
+
+    @media(max-width: 768px){
+        display: none;
+    }
 }
 
 .mobile-time {
     display: none;
-}
 
-@media(max-width: 768px) {
-    .desktop-time {
-        display: none;
-    }
-
-    .mobile-time {
+    @media(max-width: 768px){
         display: block;
     }
 }
 
 .fork-me-desktop {
     display: block;
-}
 
-@media(max-width: 768px){
-    .fork-me-desktop {
+    @media(max-width: 768px){
         display: none;
     }
 }
@@ -339,10 +333,8 @@ ul.alert-dropdown {
     display: none;
     height: 50px;
     margin: 0;
-}
 
-@media(max-width: 768px){
-    .fork-me-mobile-wrapper{
+    @media(max-width: 768px){
         display: inline;
     }
 }
@@ -374,20 +366,16 @@ ul.alert-dropdown {
 
 .trends-controls-desktop {
     display: block;
-}
 
-@media(max-width: 768px){
-    .trends-controls-desktop {
+    @media(max-width: 768px){
         display: none;
     }
 }
 
 .trends-controls-mobile {
     display: none;
-}
 
-@media(max-width: 768px){
-    .trends-controls-mobile {
+    @media(max-width: 768px){
         display: block;
     }
 }

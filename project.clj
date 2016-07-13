@@ -46,13 +46,24 @@
   :plugins [[lein-environ "1.0.2"]
             [ragtime/ragtime.lein "0.3.9"]
             [lein-cljsbuild "1.1.3"]
-            [lein-figwheel "0.5.0-6"]]
+            [lein-figwheel "0.5.0-6"]
+            [lein-sass "0.3.7"]]
+
+  :figwheel {:css-dirs ["resources/public/css"]}
+
+  :sass {:src               "design/"
+         :output-directory  "resources/public/css/"
+         :delete-output-dir false
+         :source-maps       true}
+
+  :hooks [leiningen.sass]
 
   :aliases {"migrate"  ["run" "-m" "tech-radar.migrations/migrate"]
             "rollback" ["run" "-m" "tech-radar.migrations/rollback"]}
 
-  :cljsbuild {:builds {:dev     {:source-paths ["src/cljs"]
-                                 :figwheel     {:websocket-host "localhost"}
+  :cljsbuild {:builds {:dev     {:figwheel     {:load-warninged-code true
+                                                :on-jsload           "tech-radar.core/init-render"}
+                                 :source-paths ["src/cljs"]
                                  :compiler     {:main       tech-radar.core
                                                 :asset-path "js"
                                                 :output-dir "resources/public/js"}}

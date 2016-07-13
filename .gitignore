@@ -1,6 +1,8 @@
 twitter-security.edn
 resources/public/js/
 resources/public/main.js
+resources/public/css/site.css
+resources/public/css/site.css.map
 target/
 backend-release/
 frontend-release/main.js
