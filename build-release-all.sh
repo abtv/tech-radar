@@ -27,6 +27,9 @@ cp -r resources/public/vendor frontend-release/vendor
 cp -r resources/public/font-awesome frontend-release/font-awesome
 cp -r resources/public/images frontend-release/images
 
+echo 'building design files'
+lein sass once
+
 echo 'Building js app'
 lein cljsbuild once release
 echo 'tech-radar was build'

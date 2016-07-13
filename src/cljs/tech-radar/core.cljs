@@ -13,10 +13,15 @@
 (statistic-request app-state)
 
 (def reconciler
-  (om/reconciler {:state app-state
+  (om/reconciler {:state     app-state
                   :normalize false
-                  :parser parser}))
+                  :parser    parser}))
 
-(om/add-root! reconciler
-              RootComponent
-              (.getElementById js/document "app"))
+(defn init-render []
+  (when-let [element (.getElementById js/document "app")]
+    (om/remove-root! reconciler element))
+  (om/add-root! reconciler
+                RootComponent
+                (.getElementById js/document "app")))
+
+(init-render)
