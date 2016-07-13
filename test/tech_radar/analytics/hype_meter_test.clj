@@ -50,12 +50,35 @@
             {:id    2
              :words #{"clojure" "language"}}] (tweets->bags tweets stop-words)))))
 
-(defn hype-meter [tweets {:keys [stop-words hype-count]}]
-  (let [tweets (tweets->bags tweets stop-words)]
-    (prn tweets)
-    []
+(defn calc-total [tweets-bags current]
+  (let [{:keys [words]} (nth tweets-bags current)]
+    (loop [acc     0
+           current (inc current)]
+      (if (< current (count tweets-bags))
+        (let [sim (calc-similarity words (-> (nth tweets-bags current)
+                                             (:words)))]
+          (recur (if (>= sim 0.5)
+                   (+ acc sim)
+                   acc) (inc current)))
+        acc))))
 
-    ))
+(defn hype-meter [tweets {:keys [stop-words hype-count]}]
+  (let [tweets  (tweets->bags tweets stop-words)
+        weights (loop [weights []
+                       i       0]
+                  (if (< i (dec (count tweets)))
+                    (recur (conj weights [i (calc-total tweets i)]) (inc i))
+                    weights))]
+    ;TODO while this is ok to show hype-count records for the first time, we still need to analyze resulting set (we can have possible duplicates)
+    (->> weights
+         (sort-by identity (fn [[id1 weight1]
+                                [id2 weight2]]
+                             (cond
+                               (< weight2 weight1) -1
+                               (= weight2 weight1) (>= id2 id1)
+                               :else 1)))
+         (take hype-count)
+         (mapv first))))
 
 (deftest hype-meter-test
   (let [stop-words #{"i" "it" "a" "an" "the" "and" "or" "is" "are" "on"}
@@ -75,5 +98,5 @@
                                    :text text}) texts)]
     (is (= [] (hype-meter [] {:stop-words #{}
                               :hype-count 10})))
-    (is (= [1] (hype-meter tweets {:stop-words stop-words
+    (is (= [0 4 1] (hype-meter tweets {:stop-words stop-words
                                    :hype-count 3})))))
