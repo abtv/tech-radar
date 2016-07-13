@@ -47,7 +47,7 @@
   (thread
     (timbre/info "twitter loader started")
     (try
-      #_(let [queue     (LinkedBlockingQueue. 1000)
+      (let [queue     (LinkedBlockingQueue. 1000)
             end-point (new-endpoint track)
             auth      (OAuth1. app-key app-secret user-token user-token-secret)
             client    (new-client {:queue     queue
