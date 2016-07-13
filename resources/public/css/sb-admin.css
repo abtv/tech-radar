@@ -323,16 +323,16 @@ ul.alert-dropdown {
     display: block;
 }
 
-.fork-me-desktop-img {
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-
 @media(max-width: 768px){
     .fork-me-desktop {
         display: none;
     }
+}
+
+.fork-me-desktop-img {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 .fork-me-mobile-wrapper {
@@ -370,4 +370,24 @@ ul.alert-dropdown {
 
 .pie-diagram {
     float: right;
+}
+
+.trends-controls-desktop {
+    display: block;
+}
+
+@media(max-width: 768px){
+    .trends-controls-desktop {
+        display: none;
+    }
+}
+
+.trends-controls-mobile {
+    display: none;
+}
+
+@media(max-width: 768px){
+    .trends-controls-mobile {
+        display: block;
+    }
 }
