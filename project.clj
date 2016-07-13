@@ -49,8 +49,6 @@
             [lein-figwheel "0.5.0-6"]
             [lein-sass "0.3.7"]]
 
-  :figwheel {:css-dirs ["resources/public/css"]}
-
   :sass {:src               "design/"
          :output-directory  "resources/public/css/"
          :delete-output-dir false
@@ -60,7 +58,8 @@
             "rollback" ["run" "-m" "tech-radar.migrations/rollback"]}
 
   :cljsbuild {:builds {:dev     {:figwheel     {:load-warninged-code true
-                                                :on-jsload           "tech-radar.core/init-render"}
+                                                :css-dirs            ["resources/public/css"]
+                                                :nrepl-port          7002}
                                  :source-paths ["src/cljs"]
                                  :compiler     {:main       tech-radar.core
                                                 :asset-path "js"
