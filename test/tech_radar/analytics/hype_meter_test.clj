@@ -50,7 +50,30 @@
             {:id    2
              :words #{"clojure" "language"}}] (tweets->bags tweets stop-words)))))
 
-(defn hype-meter [tweets])
+(defn hype-meter [tweets {:keys [stop-words hype-count]}]
+  (let [tweets (tweets->bags tweets stop-words)]
+    (prn tweets)
+    []
+
+    ))
 
 (deftest hype-meter-test
-  (let []))
+  (let [stop-words #{"i" "it" "a" "an" "the" "and" "or" "is" "are" "on"}
+        texts      ["Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                    "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"
+                    "Clojure spec Screencast. Is it possible to build a static analyzer based on specs tests? https://t.co/1F1FzO26o9"
+                    "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"
+                    "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                    "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                    "RT @richhickey: @stuarthalloway screeencast on the leverage you get with #clojure spec https://t.co/BnBHdjcnYc"
+                    "RT @DefnPodcast: Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hopl…"
+                    "Giving a lightning talk on derivatives, a small lib I made for materialised views ins ClojureScript/Rum apps: https://t.co/4pcGFGJlV2"
+                    "Очень чётенький курс по clojure. Полистал - весьма последовательно и полезно. https://t.co/nIpetEPROB https://t.co/W375upGeng"
+                    "RT @nikitonsky: Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co…"]
+        tweets     (map-indexed (fn [idx text]
+                                  {:id   idx
+                                   :text text}) texts)]
+    (is (= [] (hype-meter [] {:stop-words #{}
+                              :hype-count 10})))
+    (is (= [1] (hype-meter tweets {:stop-words stop-words
+                                   :hype-count 3})))))
