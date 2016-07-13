@@ -5,7 +5,7 @@
             [tech-radar.state :refer [app-state]]
             [tech-radar.history :refer [navigate-to-url!]]
             [tech-radar.services.search :refer [make-search]]
-            [tech-radar.ui.topic-view :as topic-view]))
+            [tech-radar.ui.table-view :as table-view]))
 
 (defn- on-hashtag-click [topic]
   (let [all-rects    (.selectAll js/d3 (str "#" (name topic) " rect"))
@@ -256,7 +256,7 @@
                     (mapv #(trend-type-select-item % trend-type)))]]]
             [:div.row
              [:div.col-lg-6
-              (topic-view/table-view (om/computed {} {:texts []}))]
+              (table-view/table-view (om/computed {} {:texts []}))]
              [:div.col-lg-6
               (chart-view (om/computed props {:trend-type    trend-type
                                               :current-trend current-trend}))]]]
