@@ -56,8 +56,6 @@
          :delete-output-dir false
          :source-maps       true}
 
-  :hooks [leiningen.sass]
-
   :aliases {"migrate"  ["run" "-m" "tech-radar.migrations/migrate"]
             "rollback" ["run" "-m" "tech-radar.migrations/rollback"]}
 
