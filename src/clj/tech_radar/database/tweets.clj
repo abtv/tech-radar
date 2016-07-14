@@ -8,7 +8,9 @@
             [tech-radar.utils.database :refer [to-underscores
                                                to-dashes
                                                map->db-fn]]
-            [clj-time.coerce :refer [to-sql-time]]))
+            [clj-time.coerce :refer [to-sql-time]]
+            [clj-time.local :as local]
+            [clj-time.core :as time]))
 
 (def tweet->db (map->db-fn {:date-columns #{:created-at
                                             :user-created-at}}))
@@ -50,15 +52,23 @@
          (into []))))
 
 (defn- daily-tweets-per-topic-query [topic max-records-count]
-  (let [topic* (name topic)]
+  (let [topic* (name topic)
+        from   (-> (local/local-now)
+                   (time/minus (time/days 1))
+                   (to-sql-time))
+        to     (-> (local/local-now)
+                   (to-sql-time))]
     (-> {:select   [:tweets.id :tweets.twitter-id :tweets.text :tweets.created-at]
          :from     [:tweets]
          :join     [:topics [:= :tweets.id :topics.tweet-id]]
-         ;TODO add :created-at filter
-         :where    [:= :topics.topic :?topic]
+         :where    [:and [:= :topics.topic :?topic]
+                    [:>= :topics.created-at :?from]
+                    [:<= :topics.created-at :?to]]
          :order-by [[:tweets.created-at :desc]]
          :limit    max-records-count}
-        (format/format :params {:topic topic*}))))
+        (format/format :params {:topic topic*
+                                :from  from
+                                :to    to}))))
 
 (defn load-daily-tweets-per-topic [database {:keys [topic max-record-count]}]
   (let [daily-tweets-query* (daily-tweets-per-topic-query topic max-record-count)]

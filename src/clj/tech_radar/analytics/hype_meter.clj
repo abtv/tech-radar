@@ -57,7 +57,8 @@
                                (->> (nth ordered-indices ordered-index)
                                     (nth tweets-bags)
                                     (:words)))
-        similarity-threshold 0.5]
+        similarity-threshold 0.99]
+    (prn ordered-indices)
     (if (seq ordered-indices)
       (loop [popular-tweets (transient [(get-tweet 0)])
              words          (get-words 0)

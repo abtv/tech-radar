@@ -79,7 +79,7 @@
                              :cache-update-timeout-s  "10"
                              :max-hashtags-per-trend  "25"
                              :max-texts-per-request   "200"
-                             :max-tweet-count         "100000"
+                             :max-tweet-count         "1000"
                              :metrics-timeout-s       "100"
                              :log-path                "./logs/tech-radar.log"
                              :max-log-size-mb         "1"
