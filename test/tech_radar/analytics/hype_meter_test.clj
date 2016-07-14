@@ -51,38 +51,89 @@
              :words #{"clojure" "language"}}] (tweets->bags tweets stop-words)))))
 
 (defn calc-total [tweets-bags current]
-  (let [{:keys [words]} (nth tweets-bags current)]
+  (let [similarity-threshold 0.5
+        {:keys [words]} (nth tweets-bags current)]
     (loop [acc     0
            current (inc current)]
       (if (< current (count tweets-bags))
         (let [sim (calc-similarity words (-> (nth tweets-bags current)
                                              (:words)))]
-          (recur (if (>= sim 0.5)
+          (recur (if (>= sim similarity-threshold)
                    (+ acc sim)
                    acc) (inc current)))
         acc))))
 
-(defn hype-meter [tweets {:keys [stop-words hype-count]}]
-  (let [tweets  (tweets->bags tweets stop-words)
-        weights (loop [weights []
+(defn reorder-tweets-by-similarity [tweets-bags]
+  (let [weights (loop [weights (transient [])
                        i       0]
-                  (if (< i (dec (count tweets)))
-                    (recur (conj weights [i (calc-total tweets i)]) (inc i))
-                    weights))]
-    ;TODO while this is ok to show hype-count records for the first time, we still need to analyze resulting set (we can have possible duplicates)
+                  (if (< i (dec (count tweets-bags)))
+                    (recur (conj! weights [i (calc-total tweets-bags i)]) (inc i))
+                    (persistent! weights)))]
     (->> weights
+         (filter (fn [[id weight]]
+                   (> weight 0)))
          (sort-by identity (fn [[id1 weight1]
                                 [id2 weight2]]
                              (cond
                                (< weight2 weight1) -1
                                (= weight2 weight1) (>= id2 id1)
                                :else 1)))
-         (take hype-count)
          (mapv first))))
+
+(deftest reorder-tweets-by-similarity-test
+  (let [stop-words  #{"i" "it" "a" "an" "the" "and" "or" "is" "are" "on"}
+        texts       ["Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                     "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"
+                     "Clojure spec Screencast. Is it possible to build a static analyzer based on specs tests? https://t.co/1F1FzO26o9"
+                     "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"
+                     "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                     "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                     "RT @richhickey: @stuarthalloway screeencast on the leverage you get with #clojure spec https://t.co/BnBHdjcnYc"
+                     "RT @DefnPodcast: Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hopl…"
+                     "Giving a lightning talk on derivatives, a small lib I made for materialised views ins ClojureScript/Rum apps: https://t.co/4pcGFGJlV2"
+                     "Очень чётенький курс по clojure. Полистал - весьма последовательно и полезно. https://t.co/nIpetEPROB https://t.co/W375upGeng"
+                     "RT @nikitonsky: Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co…"]
+        tweets      (map-indexed (fn [idx text]
+                                   {:id   idx
+                                    :text text}) texts)
+        tweets-bags (tweets->bags tweets stop-words)]
+    (is (= [] (reorder-tweets-by-similarity [])))
+    (is (= [0 4 1 3] (reorder-tweets-by-similarity tweets-bags)))))
+
+(defn hype-meter [tweets {:keys [stop-words hype-count]}]
+  (let [tweets-bags          (tweets->bags tweets stop-words)
+        ordered-indices      (reorder-tweets-by-similarity tweets-bags)
+        get-tweet            (fn [ordered-index]
+                               (->> (nth ordered-indices ordered-index)
+                                    (nth tweets)))
+        get-words            (fn [ordered-index]
+                               (->> (nth ordered-indices ordered-index)
+                                    (nth tweets-bags)
+                                    (:words)))
+        similarity-threshold 0.5]
+    (if (seq ordered-indices)
+      (loop [popular-tweets (transient [(get-tweet 0)])
+             words          (get-words 0)
+             index          1]
+        (if (< index (count ordered-indices))
+          (let [words2  (get-words index)
+                sim     (calc-similarity words words2)
+                similar (> sim similarity-threshold)]
+            (recur (if similar
+                     popular-tweets
+                     (conj! popular-tweets (get-tweet index)))
+                   (if similar
+                     words
+                     (get-words index))
+                   (inc index)))
+          (->> (persistent! popular-tweets)
+               (take hype-count))))
+      [])))
 
 (deftest hype-meter-test
   (let [stop-words #{"i" "it" "a" "an" "the" "and" "or" "is" "are" "on"}
         texts      ["Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                    "Очень чётенький курс по clojure. Полистал - весьма последовательно и полезно. https://t.co/nIpetEPROB https://t.co/W375upGeng"
                     "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"
                     "Clojure spec Screencast. Is it possible to build a static analyzer based on specs tests? https://t.co/1F1FzO26o9"
                     "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"
@@ -91,12 +142,21 @@
                     "RT @richhickey: @stuarthalloway screeencast on the leverage you get with #clojure spec https://t.co/BnBHdjcnYc"
                     "RT @DefnPodcast: Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hopl…"
                     "Giving a lightning talk on derivatives, a small lib I made for materialised views ins ClojureScript/Rum apps: https://t.co/4pcGFGJlV2"
-                    "Очень чётенький курс по clojure. Полистал - весьма последовательно и полезно. https://t.co/nIpetEPROB https://t.co/W375upGeng"
                     "RT @nikitonsky: Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co…"]
         tweets     (map-indexed (fn [idx text]
                                   {:id   idx
                                    :text text}) texts)]
     (is (= [] (hype-meter [] {:stop-words #{}
                               :hype-count 10})))
-    (is (= [0 4 1] (hype-meter tweets {:stop-words stop-words
-                                   :hype-count 3})))))
+    (is (= [{:id   0
+             :text "Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"}]
+           (hype-meter tweets {:stop-words stop-words
+                               :hype-count 1})))
+    (is (= [{:id   0
+             :text "Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"}
+            {:id   2
+             :text "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"}
+            {:id   4
+             :text "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"}]
+           (hype-meter tweets {:stop-words stop-words
+                               :hype-count 5})))))
