@@ -97,7 +97,10 @@
                                       :set-trend-type    set-trend-type})]
             [:div.row
              [:div.col-lg-6
-              (table-view/table-view (om/computed {} {:texts []}))]
+              (let [popular-tweets (-> trends
+                                       (current-trend)
+                                       (:popular))]
+                (table-view/table-view (om/computed {} {:texts popular-tweets})))]
              [:div.col-lg-6
               (chart-view/chart-view (om/computed props {:trend-type    trend-type
                                                          :current-trend current-trend}))]]]

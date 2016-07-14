@@ -14,13 +14,13 @@
 
 (defn- set-trends [state trends]
   (let [trends* (->> trends
-                     (map (fn [[topic hastags]]
-                            [topic (convert hastags)]))
+                     (map (fn [[topic {:keys [data popular]}]]
+                            [topic {:data    (convert data)
+                                    :popular popular}]))
                      (into {}))]
     (swap! state assoc-in [:trends] trends*)))
 
 (defn run-trends [state]
   (go
     (let [trends (<! (web :trends/get {}))]
-      (js/console.log "trends")
       (set-trends state trends))))

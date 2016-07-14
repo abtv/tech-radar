@@ -139,11 +139,10 @@
                {:keys [name]} (current-trend menu-items)]
            [:div.row {}
             [:div.col-lg-12 {:id parent-id}
-             (js/console.log (clj->js trends))
              (when-let [data (-> trends
                                  (current-trend)
+                                 (:data)
                                  (trend-type))]
-               (js/console.log (clj->js data))
                (chart {:id        (cljs.core/name current-trend)
                        :name      name
                        :data      data
