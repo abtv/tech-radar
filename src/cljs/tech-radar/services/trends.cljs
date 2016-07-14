@@ -22,4 +22,5 @@
 (defn run-trends [state]
   (go
     (let [trends (<! (web :trends/get {}))]
+      (js/console.log "trends")
       (set-trends state trends))))

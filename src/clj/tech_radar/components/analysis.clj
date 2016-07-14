@@ -14,7 +14,9 @@
             [tech-radar.analytics.model :refer [new-model]]
             [tech-radar.analytics.cache :refer [new-cache
                                                 get-cached-trends]]
-            [tech-radar.analytics.protocols :as protocols]))
+            [tech-radar.analytics.protocols :as protocols]
+            [immutant.scheduling :refer [schedule every in stop id]]
+            [tech-radar.services.hype-meter :as hype-meter]))
 
 (defn- get-settings []
   {:max-hashtags-per-trend (-> env
@@ -32,6 +34,7 @@
 
 (defrecord Analysis [database metrics preprocessor
                      stop-hashtags-update-fn stop-cache-update-fn
+                     hype-meter-job
                      trends-fn texts-fn search-fn index-info-fn]
   component/Lifecycle
   (start [component]
@@ -70,6 +73,16 @@
                                                          :cache-update-timeout-s cache-update-timeout-s})]
           (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
                            :stop-cache-update-fn stop-cache-update-fn
+                           :hype-meter-job (schedule (fn []
+                                                       (let [popular-tweets (hype-meter/run-hype-meter {:database database
+                                                                                                        :topics   topics})]
+                                                         (swap! cache (fn [cache]
+                                                                        (reduce (fn [cache [topic tweets]]
+                                                                                  (assoc-in cache [topic :popular] tweets))
+                                                                                cache popular-tweets)))))
+                                                     (-> (id :hype-meter)
+                                                         (in 0 :minute)
+                                                         (every 30 :minutes)))
                            :statistic-fn (fn []
                                            (protocols/statistic model))
                            :trends-fn (fn []
@@ -83,9 +96,12 @@
   (stop [component]
     (when stop-cache-update-fn
       (timbre/info "Stopping analysis")
+      (if (stop hype-meter-job)
+        (timbre/info "Stopped hype-meter-job")
+        (timbre/error "Failed to stop hype-meter-job"))
       (stop-cache-update-fn)
       (stop-hashtags-update-fn)
-      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :trends-fn :texts-fn :search-fn :index-info-fn))))
+      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :hype-meter-job :trends-fn :texts-fn :search-fn :index-info-fn))))
 
 (defn new-analysis []
   (map->Analysis {}))

@@ -89,6 +89,7 @@
                        :env  {:host                    "0.0.0.0"
                               :port                    "3000"
                               :database                "jdbc:postgresql://localhost/tech_radar?user=postgres&password=postgres"
+                              :load-tweets             "true"
                               :twitter-security        "twitter-security.edn"
                               :twitter-settings        "twitter-settings.edn"
                               :classify-settings       "classify-settings.edn"

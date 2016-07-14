@@ -49,6 +49,23 @@
          (reverse)
          (into []))))
 
+(defn- daily-tweets-per-topic-query [topic max-records-count]
+  (let [topic* (name topic)]
+    (-> {:select   [:tweets.id :tweets.twitter-id :tweets.text :tweets.created-at]
+         :from     [:tweets]
+         :join     [:topics [:= :tweets.id :topics.tweet-id]]
+         ;TODO add :created-at filter
+         :where    [:= :topics.topic :?topic]
+         :order-by [[:tweets.created-at :desc]]
+         :limit    max-records-count}
+        (format/format :params {:topic topic*}))))
+
+(defn load-daily-tweets-per-topic [database {:keys [topic max-record-count]}]
+  (let [daily-tweets-query* (daily-tweets-per-topic-query topic max-record-count)]
+    (->> (jdbc/query database daily-tweets-query* :identifiers to-dashes)
+         (reverse)
+         (into []))))
+
 (defn- tweets-query [max-record-count]
   (-> {:select   [:tweets.id :tweets.twitter-id :tweets.text :tweets.created-at :topics.topic]
        :from     [:tweets]
