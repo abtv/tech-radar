@@ -2,11 +2,6 @@
 
 (def word #"[#]?[\p{L}0-9\-]+")
 
-#_(defn get-words [^String text]
-    (->> (.toLowerCase text)
-         (re-seq word)
-         (set)))
-
 (defn get-words
   ([^String text]
    (->> (.toLowerCase text)
