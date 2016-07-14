@@ -8,7 +8,8 @@
             [clojure.core.async :refer [chan close!]]
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
-            [tech-radar.utils.parsers :refer [parse-int]]
+            [tech-radar.utils.parsers :refer [parse-int
+                                              parse-double]]
             [tech-radar.utils.settings :refer [load-classify-settings
                                                load-hashtag-filter-settings]]
             [tech-radar.analytics.model :refer [new-model]]
@@ -19,17 +20,13 @@
             [tech-radar.services.hype-meter :as hype-meter]))
 
 (defn- get-settings []
-  {:max-hashtags-per-trend (-> env
-                               (:max-hashtags-per-trend)
+  {:max-hashtags-per-trend (-> (env :max-hashtags-per-trend)
                                (parse-int))
-   :max-texts-per-request  (-> env
-                               (:max-texts-per-request)
+   :max-texts-per-request  (-> (env :max-texts-per-request)
                                (parse-int))
-   :max-tweet-count        (-> env
-                               (:max-tweet-count)
+   :max-tweet-count        (-> (env :max-tweet-count)
                                (parse-int))
-   :cache-update-timeout-s (-> env
-                               (:cache-update-timeout-s)
+   :cache-update-timeout-s (-> (env :cache-update-timeout-s)
                                (parse-int))})
 
 (defrecord Analysis [database metrics preprocessor
@@ -70,19 +67,20 @@
                                                             :metrics                 metrics})
               stop-cache-update-fn    (run-cache-update {:model                  model
                                                          :cache                  cache
-                                                         :cache-update-timeout-s cache-update-timeout-s})]
+                                                         :cache-update-timeout-s cache-update-timeout-s})
+              hype-meter-fn           (hype-meter/new-hype-meter-fn {:cache                cache
+                                                                     :database             database
+                                                                     :topics               topics
+                                                                     :hype-tweet-count     (-> (env :hype-tweet-count)
+                                                                                               (parse-int))
+                                                                     :similarity-threshold (-> (env :similarity-threshold)
+                                                                                               (parse-double))})]
           (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
                            :stop-cache-update-fn stop-cache-update-fn
-                           :hype-meter-job (schedule (fn []
-                                                       (let [popular-tweets (hype-meter/run-hype-meter {:database database
-                                                                                                        :topics   topics})]
-                                                         (swap! cache (fn [cache]
-                                                                        (reduce (fn [cache [topic tweets]]
-                                                                                  (assoc-in cache [topic :popular] tweets))
-                                                                                cache popular-tweets)))))
+                           :hype-meter-job (schedule hype-meter-fn
                                                      (-> (id :hype-meter)
                                                          (in 0 :minute)
-                                                         (every 30 :minutes)))
+                                                         (every 1 :hours)))
                            :statistic-fn (fn []
                                            (protocols/statistic model))
                            :trends-fn (fn []

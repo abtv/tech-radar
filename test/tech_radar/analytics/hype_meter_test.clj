@@ -37,56 +37,60 @@
              :words #{"clojure" "language"}}] (hype-meter/tweets->bags tweets stop-words)))))
 
 (deftest reorder-tweets-by-similarity-test
-  (let [stop-words  #{"i" "it" "a" "an" "the" "and" "or" "is" "are" "on"}
-        texts       ["Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                     "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                     "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"
-                     "Clojure spec Screencast. Is it possible to build a static analyzer based on specs tests? https://t.co/1F1FzO26o9"
-                     "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"
-                     "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                     "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                     "RT @richhickey: @stuarthalloway screeencast on the leverage you get with #clojure spec https://t.co/BnBHdjcnYc"
-                     "RT @DefnPodcast: Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hopl…"
-                     "Giving a lightning talk on derivatives, a small lib I made for materialised views ins ClojureScript/Rum apps: https://t.co/4pcGFGJlV2"
-                     "Очень чётенький курс по clojure. Полистал - весьма последовательно и полезно. https://t.co/nIpetEPROB https://t.co/W375upGeng"
-                     "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                     "RT @nikitonsky: Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co…"]
-        tweets      (map-indexed (fn [idx text]
-                                   {:id   idx
-                                    :text text}) texts)
-        tweets-bags (hype-meter/tweets->bags tweets stop-words)]
-    (is (= [] (hype-meter/reorder-tweets-by-similarity [])))
-    (is (= [0 1 5 6 2 4] (hype-meter/reorder-tweets-by-similarity tweets-bags)))))
+  (let [stop-words           #{"i" "it" "a" "an" "the" "and" "or" "is" "are" "on"}
+        texts                ["Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"
+                              "Clojure spec Screencast. Is it possible to build a static analyzer based on specs tests? https://t.co/1F1FzO26o9"
+                              "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"
+                              "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "RT @richhickey: @stuarthalloway screeencast on the leverage you get with #clojure spec https://t.co/BnBHdjcnYc"
+                              "RT @DefnPodcast: Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hopl…"
+                              "Giving a lightning talk on derivatives, a small lib I made for materialised views ins ClojureScript/Rum apps: https://t.co/4pcGFGJlV2"
+                              "Очень чётенький курс по clojure. Полистал - весьма последовательно и полезно. https://t.co/nIpetEPROB https://t.co/W375upGeng"
+                              "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "RT @nikitonsky: Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co…"]
+        tweets               (map-indexed (fn [idx text]
+                                            {:id   idx
+                                             :text text}) texts)
+        tweets-bags          (hype-meter/tweets->bags tweets stop-words)
+        similarity-threshold 0.5]
+    (is (= [] (hype-meter/reorder-tweets-by-similarity [] similarity-threshold)))
+    (is (= [0 1 5 6 2 4] (hype-meter/reorder-tweets-by-similarity tweets-bags similarity-threshold)))))
 
 (deftest popular-tweets-test
-  (let [stop-words #{"i" "it" "a" "an" "the" "and" "or" "is" "are" "on"}
-        texts      ["Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                    "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                    "Очень чётенький курс по clojure. Полистал - весьма последовательно и полезно. https://t.co/nIpetEPROB https://t.co/W375upGeng"
-                    "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"
-                    "Clojure spec Screencast. Is it possible to build a static analyzer based on specs tests? https://t.co/1F1FzO26o9"
-                    "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"
-                    "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                    "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                    "RT @richhickey: @stuarthalloway screeencast on the leverage you get with #clojure spec https://t.co/BnBHdjcnYc"
-                    "RT @DefnPodcast: Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hopl…"
-                    "Giving a lightning talk on derivatives, a small lib I made for materialised views ins ClojureScript/Rum apps: https://t.co/4pcGFGJlV2"
-                    "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
-                    "RT @nikitonsky: Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co…"]
-        tweets     (map-indexed (fn [idx text]
-                                  {:id   idx
-                                   :text text}) texts)]
+  (let [stop-words           #{"i" "it" "a" "an" "the" "and" "or" "is" "are" "on"}
+        texts                ["Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "Очень чётенький курс по clojure. Полистал - весьма последовательно и полезно. https://t.co/nIpetEPROB https://t.co/W375upGeng"
+                              "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"
+                              "Clojure spec Screencast. Is it possible to build a static analyzer based on specs tests? https://t.co/1F1FzO26o9"
+                              "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"
+                              "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "RT @richhickey: @stuarthalloway screeencast on the leverage you get with #clojure spec https://t.co/BnBHdjcnYc"
+                              "RT @DefnPodcast: Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hopl…"
+                              "Giving a lightning talk on derivatives, a small lib I made for materialised views ins ClojureScript/Rum apps: https://t.co/4pcGFGJlV2"
+                              "RT @planetclojure: Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"
+                              "RT @nikitonsky: Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co…"]
+        tweets               (map-indexed (fn [idx text]
+                                            {:id   idx
+                                             :text text}) texts)
+        similarity-threshold 0.5]
     (is (= [] (hype-meter/popular-tweets [] {:stop-words #{}
                                              :hype-count 10})))
     (is (= [{:id   0
              :text "Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"}]
-           (hype-meter/popular-tweets tweets {:stop-words stop-words
-                                              :hype-count 1})))
+           (hype-meter/popular-tweets tweets {:stop-words           stop-words
+                                              :hype-count           1
+                                              :similarity-threshold similarity-threshold})))
     (is (= [{:id   0
              :text "Clojure spec Screencast: Leverage https://t.co/GSRJ5pH4rK"}
             {:id   3
              :text "Zetawar (ClojureScript game based on DataScript) needs just $1K more—please support it! Could make a nice case https://t.co/K3ZBW3YN0Y"}
             {:id   5
              :text "Episode 5 - Hoplon Special with Micha Niskin Now up on SoundCloud https://t.co/7ZmnqH05HJ #Clojure #ClojureScript #Hoplon"}]
-           (hype-meter/popular-tweets tweets {:stop-words stop-words
-                                              :hype-count 10})))))
+           (hype-meter/popular-tweets tweets {:stop-words           stop-words
+                                              :hype-count           10
+                                              :similarity-threshold similarity-threshold})))))

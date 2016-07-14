@@ -17,9 +17,8 @@
           {:id    id
            :words (utils/get-words text stop-words-set)}) tweets))
 
-(defn calc-total [tweets-bags current]
-  (let [similarity-threshold 0.5
-        {:keys [words]} (nth tweets-bags current)]
+(defn calc-total [tweets-bags current similarity-threshold]
+  (let [{:keys [words]} (nth tweets-bags current)]
     (loop [acc     0
            current (inc current)]
       (if (< current (count tweets-bags))
@@ -30,11 +29,11 @@
                    acc) (inc current)))
         acc))))
 
-(defn reorder-tweets-by-similarity [tweets-bags]
+(defn reorder-tweets-by-similarity [tweets-bags similarity-threshold]
   (let [weights (loop [weights (transient [])
                        i       0]
                   (if (< i (dec (count tweets-bags)))
-                    (recur (conj! weights [i (calc-total tweets-bags i)]) (inc i))
+                    (recur (conj! weights [i (calc-total tweets-bags i similarity-threshold)]) (inc i))
                     (persistent! weights)))]
     (->> weights
          (filter (fn [[id weight]]
@@ -47,33 +46,40 @@
                                :else 1)))
          (mapv first))))
 
-(defn popular-tweets [tweets {:keys [stop-words hype-count]}]
-  (let [tweets-bags          (tweets->bags tweets stop-words)
-        ordered-indices      (reorder-tweets-by-similarity tweets-bags)
-        get-tweet            (fn [ordered-index]
-                               (->> (nth ordered-indices ordered-index)
-                                    (nth tweets)))
-        get-words            (fn [ordered-index]
-                               (->> (nth ordered-indices ordered-index)
-                                    (nth tweets-bags)
-                                    (:words)))
-        similarity-threshold 0.99]
-    (prn ordered-indices)
+(defn popular-tweets [tweets {:keys [stop-words hype-count similarity-threshold]}]
+  (let [tweets-bags     (tweets->bags tweets stop-words)
+        ordered-indices (reorder-tweets-by-similarity tweets-bags similarity-threshold)
+        get-tweet       (fn [tweet-index]
+                          (nth tweets tweet-index))
+        get-words       (fn [ordered-index]
+                          (->> (nth ordered-indices ordered-index)
+                               (nth tweets-bags)
+                               (:words)))
+        unique-indices  (mapv (fn [_]
+                                true) ordered-indices)]
     (if (seq ordered-indices)
-      (loop [popular-tweets (transient [(get-tweet 0)])
-             words          (get-words 0)
-             index          1]
-        (if (< index (count ordered-indices))
-          (let [words2  (get-words index)
-                sim     (calc-similarity words words2)
-                similar (> sim similarity-threshold)]
-            (recur (if similar
-                     popular-tweets
-                     (conj! popular-tweets (get-tweet index)))
-                   (if similar
-                     words
-                     (get-words index))
-                   (inc index)))
-          (->> (persistent! popular-tweets)
+      (loop [i              0
+             unique-indices unique-indices]
+        (if (< i (count ordered-indices))
+          (let [words          (get-words i)
+                unique-indices (if (nth unique-indices i)
+                                 (loop [j              (inc i)
+                                        unique-indices unique-indices]
+                                   (if (< j (count ordered-indices))
+                                     (let [words2  (get-words j)
+                                           sim     (calc-similarity words words2)
+                                           similar (>= sim similarity-threshold)]
+                                       (recur (inc j) (if similar
+                                                        (assoc unique-indices j false)
+                                                        unique-indices)))
+                                     unique-indices))
+                                 unique-indices)]
+            (recur (inc i) unique-indices))
+          (->> ordered-indices
+               (map-indexed (fn [idx tweet-idx]
+                              [idx tweet-idx]))
+               (filter (fn [[idx tweet-idx]]
+                         (nth unique-indices idx)))
+               (map (comp get-tweet second))
                (take hype-count))))
       [])))
