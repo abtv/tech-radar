@@ -3,7 +3,7 @@
             [sablono.core :refer-macros [html]]
             [tech-radar.utils.view :refer [prevent-propagation]]
             [tech-radar.state :refer [app-state]]
-            [tech-radar.services.search :refer [make-search]]))
+            [tech-radar.services.search :as search]))
 
 (defn brand-toggle [current-menu-item]
   (let [github-link "https://github.com/abtv/tech-radar"]
@@ -72,7 +72,7 @@
                                                                             {:settings [:search-text]}])))}]
     [:span.input-group-btn {}
      [:button.btn.btn-default {:on-click (fn [e]
-                                           (make-search app-state topic search-text)
+                                           (search/navigate-to-search topic search-text)
                                            (prevent-propagation e))}
       [:i.fa.fa-search {} ""]]]]])
 
