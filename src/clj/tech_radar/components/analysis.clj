@@ -17,7 +17,8 @@
                                                 get-cached-trends]]
             [tech-radar.analytics.protocols :as protocols]
             [immutant.scheduling :refer [schedule every in stop id]]
-            [tech-radar.services.hype-meter :as hype-meter]))
+            [tech-radar.services.hype-meter :as hype-meter]
+            [clojure.string :as s]))
 
 (defn- get-settings []
   {:max-hashtags-per-trend (-> (env :max-hashtags-per-trend)
@@ -28,6 +29,12 @@
                                (parse-int))
    :cache-update-timeout-s (-> (env :cache-update-timeout-s)
                                (parse-int))})
+
+(defn- load-stop-words [file-name]
+  (->> (slurp file-name)
+       (s/split-lines)
+       (filter (comp not s/blank?))
+       (set)))
 
 (defrecord Analysis [database metrics preprocessor
                      stop-hashtags-update-fn stop-cache-update-fn
@@ -74,7 +81,9 @@
                                                                      :hype-tweet-count     (-> (env :hype-tweet-count)
                                                                                                (parse-int))
                                                                      :similarity-threshold (-> (env :similarity-threshold)
-                                                                                               (parse-double))})]
+                                                                                               (parse-double))
+                                                                     :stop-words           (-> (env :stop-words)
+                                                                                               (load-stop-words))})]
           (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
                            :stop-cache-update-fn stop-cache-update-fn
                            :hype-meter-job (schedule hype-meter-fn
