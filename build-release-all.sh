@@ -6,6 +6,7 @@ rm -rf backend-release/
 lein do clean, uberjar
 mkdir backend-release/
 cp .lein-env backend-release/
+cp stopwords.txt backend-release/
 cp twitter-security.edn backend-release/
 cp twitter-settings.edn backend-release/
 cp classify-settings.edn backend-release/
@@ -32,5 +33,5 @@ cp -r resources/public/images frontend-release/images
 
 echo 'Building js app'
 lein cljsbuild once release
-echo 'tech-radar was build'
+echo 'tech-radar was built'
 
