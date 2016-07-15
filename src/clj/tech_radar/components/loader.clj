@@ -4,7 +4,8 @@
             [clojure.core.async :refer [chan sliding-buffer close!]]
             [taoensso.timbre :as timbre]
             [tech-radar.utils.settings :refer [load-twitter-security
-                                               load-twitter-settings]]))
+                                               load-twitter-settings]]
+            [environ.core :refer [env]]))
 
 (defrecord Loader [database metrics input-chan tweet-chan cancel-fn]
   component/Lifecycle
@@ -15,23 +16,26 @@
         (timbre/info "Initializing loader")
         (let [{:keys [track]} (load-twitter-settings)
               {:keys [app-key app-secret user-token user-token-secret]} (load-twitter-security)
-              input-chan (chan (sliding-buffer 10))
-              tweet-chan (chan 10)
-              cancel-fn  (run {:track             track
-                               :input-chan        input-chan
-                               :tweet-chan        tweet-chan
-                               :app-key           app-key
-                               :app-secret        app-secret
-                               :user-token        user-token
-                               :user-token-secret user-token-secret
-                               :metrics           metrics})]
+              input-chan  (chan (sliding-buffer 10))
+              tweet-chan  (chan 10)
+              load-tweets (env :load-tweets)
+              cancel-fn   (when load-tweets
+                            (run {:track             track
+                                  :input-chan        input-chan
+                                  :tweet-chan        tweet-chan
+                                  :app-key           app-key
+                                  :app-secret        app-secret
+                                  :user-token        user-token
+                                  :user-token-secret user-token-secret
+                                  :metrics           metrics}))]
           (assoc component :input-chan input-chan
                            :tweet-chan tweet-chan
                            :cancel-fn cancel-fn)))))
   (stop [component]
     (when input-chan
       (timbre/info "Stopping loader")
-      (cancel-fn)
+      (when cancel-fn
+        (cancel-fn))
       (close! input-chan)
       (close! tweet-chan)
       (dissoc component :input-chan :tweet-chan :cancel-fn))))

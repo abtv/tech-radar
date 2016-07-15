@@ -14,8 +14,9 @@
 
 (defn- set-trends [state trends]
   (let [trends* (->> trends
-                     (map (fn [[topic hastags]]
-                            [topic (convert hastags)]))
+                     (map (fn [[topic {:keys [hashtags popular-tweets]}]]
+                            [topic {:hashtags       (convert hashtags)
+                                    :popular-tweets popular-tweets}]))
                      (into {}))]
     (swap! state assoc-in [:trends] trends*)))
 

@@ -7,4 +7,7 @@
   @cache)
 
 (defn set-cached-trends [cache trends]
-  (reset! cache trends))
+  (swap! cache (fn [cache]
+                 (reduce (fn [cache [topic hashtags]]
+                           (assoc-in cache [topic :hashtags] hashtags))
+                         cache trends))))

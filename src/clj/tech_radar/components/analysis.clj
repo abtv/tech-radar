@@ -8,30 +8,30 @@
             [clojure.core.async :refer [chan close!]]
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
-            [tech-radar.utils.parsers :refer [parse-int]]
+            [tech-radar.utils.parsers :refer [parse-int
+                                              parse-double]]
             [tech-radar.utils.settings :refer [load-classify-settings
                                                load-hashtag-filter-settings]]
             [tech-radar.analytics.model :refer [new-model]]
             [tech-radar.analytics.cache :refer [new-cache
                                                 get-cached-trends]]
-            [tech-radar.analytics.protocols :as protocols]))
+            [tech-radar.analytics.protocols :as protocols]
+            [immutant.scheduling :refer [schedule every in stop id]]
+            [tech-radar.services.hype-meter :as hype-meter]))
 
 (defn- get-settings []
-  {:max-hashtags-per-trend (-> env
-                               (:max-hashtags-per-trend)
+  {:max-hashtags-per-trend (-> (env :max-hashtags-per-trend)
                                (parse-int))
-   :max-texts-per-request  (-> env
-                               (:max-texts-per-request)
+   :max-texts-per-request  (-> (env :max-texts-per-request)
                                (parse-int))
-   :max-tweet-count        (-> env
-                               (:max-tweet-count)
+   :max-tweet-count        (-> (env :max-tweet-count)
                                (parse-int))
-   :cache-update-timeout-s (-> env
-                               (:cache-update-timeout-s)
+   :cache-update-timeout-s (-> (env :cache-update-timeout-s)
                                (parse-int))})
 
 (defrecord Analysis [database metrics preprocessor
                      stop-hashtags-update-fn stop-cache-update-fn
+                     hype-meter-job
                      trends-fn texts-fn search-fn index-info-fn]
   component/Lifecycle
   (start [component]
@@ -67,9 +67,20 @@
                                                             :metrics                 metrics})
               stop-cache-update-fn    (run-cache-update {:model                  model
                                                          :cache                  cache
-                                                         :cache-update-timeout-s cache-update-timeout-s})]
+                                                         :cache-update-timeout-s cache-update-timeout-s})
+              hype-meter-fn           (hype-meter/new-hype-meter-fn {:cache                cache
+                                                                     :database             database
+                                                                     :topics               topics
+                                                                     :hype-tweet-count     (-> (env :hype-tweet-count)
+                                                                                               (parse-int))
+                                                                     :similarity-threshold (-> (env :similarity-threshold)
+                                                                                               (parse-double))})]
           (assoc component :stop-hashtags-update-fn stop-hashtags-update-fn
                            :stop-cache-update-fn stop-cache-update-fn
+                           :hype-meter-job (schedule hype-meter-fn
+                                                     (-> (id :hype-meter)
+                                                         (in 0 :minute)
+                                                         (every 1 :hours)))
                            :statistic-fn (fn []
                                            (protocols/statistic model))
                            :trends-fn (fn []
@@ -83,9 +94,12 @@
   (stop [component]
     (when stop-cache-update-fn
       (timbre/info "Stopping analysis")
+      (if (stop hype-meter-job)
+        (timbre/info "Stopped hype-meter-job")
+        (timbre/error "Failed to stop hype-meter-job"))
       (stop-cache-update-fn)
       (stop-hashtags-update-fn)
-      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :trends-fn :texts-fn :search-fn :index-info-fn))))
+      (dissoc component :stop-hashtags-update-fn :stop-cache-update-fn :hype-meter-job :trends-fn :texts-fn :search-fn :index-info-fn))))
 
 (defn new-analysis []
   (map->Analysis {}))

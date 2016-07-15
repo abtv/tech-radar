@@ -7,6 +7,12 @@
              (Integer/parseInt v))
         v)))
 
+(defn parse-double [v]
+  (when v
+    (or (and (string? v)
+             (Double/parseDouble v))
+        v)))
+
 (def months {"Jan" 1
              "Feb" 2
              "Mar" 3
