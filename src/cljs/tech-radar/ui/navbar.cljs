@@ -44,7 +44,7 @@
                             nil)
                    :key   (str "records_count_" records-count)}
               [:a {:on-click #(set-record-count records-count)}
-               records-count]]) [15 20 25 30])]]])
+               records-count]]) [15 20 25 30 100])]]])
 
 (defn menu-item [{:keys [href name selected]}]
   [:li {:key   (str "menu-item-" name)

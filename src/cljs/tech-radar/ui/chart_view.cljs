@@ -34,16 +34,11 @@
   (on-hashtag-click :linux)
   (on-hashtag-click :nosql))
 
-(defn max-count [hashtag-count]
-  (apply max (mapv #(:count %) hashtag-count)))
-
-(defn validate-count [count]
-  "Calculate count ticks"
-  (let [max-tick 20]
-    (min max-tick count)))
+(defn max-hashtag-count [hashtag-count]
+  (apply max (map :count hashtag-count)))
 
 (defn- draw-chart [data {:keys [id width height chart]}]
-  (let [{:keys [bounds margins plot x-axis y-axis name]} chart
+  (let [{:keys [bounds margins plot x-axis y-axis]} chart
         Chart          (.-chart js/dimple)
         svg            (.newSvg js/dimple (str "#" id) width height)
         dimple-chart   (.setMargins (Chart. svg (clj->js data)) (:left margins) (:top margins) (:right margins) (:bottom margins))
@@ -52,8 +47,8 @@
     (.addSeries dimple-chart "" plot (clj->js [count-axis hash-tags-axis]))
 
     (when (not= (count data) 0)
-      (let [count-tick (validate-count (max-count data))]
-        (set! (.-ticks count-axis) count-tick)))
+      (let [tick-count (min (max-hashtag-count data) 10)]
+        (set! (.-ticks count-axis) tick-count)))
 
     (.addOrderRule hash-tags-axis x-axis false)
     (.draw dimple-chart)
