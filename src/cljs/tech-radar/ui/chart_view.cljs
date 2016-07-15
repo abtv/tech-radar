@@ -2,14 +2,14 @@
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :refer-macros [html]]
             [tech-radar.state :refer [app-state]]
-            [tech-radar.services.search :refer [make-search]]))
+            [tech-radar.services.search :as search]))
 
 (defn- on-hashtag-click [topic]
   (let [all-rects    (.selectAll js/d3 (str "#" (name topic) " rect"))
         all-texts    (.selectAll js/d3 (str "#" (name topic) " text"))
         on-click     (fn [e]
                        (let [text (or (.-y e) e)]
-                         (make-search app-state topic (str "#" text))))
+                         (search/navigate-to-search topic text)))
         set-style-fn (fn [cursor color]
                        (fn [_]
                          (this-as this

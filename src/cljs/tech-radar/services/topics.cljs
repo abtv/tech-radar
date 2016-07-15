@@ -10,4 +10,3 @@
   (go
     (let [texts (<! (web :topics/get {:topic (name topic)}))]
       (set-topic state topic texts))))
-

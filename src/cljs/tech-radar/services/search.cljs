@@ -3,10 +3,13 @@
   (:require [cljs.core.async :refer [chan close! <! put!]]
             [tech-radar.services.web :refer [web]]
             [tech-radar.history :refer [navigate-to-url!]]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [tech-radar.history :as history]))
+
+(defn navigate-to-search [topic search-text]
+  (history/navigate-to-url! (str "/topic/" (name topic) "/search?text=" (js/encodeURI search-text))))
 
 (defn- set-search-results [state topic text {:keys [total texts]}]
-  (navigate-to-url! (str "#" (name topic) "/search"))
   (swap! state (fn [state]
                  (-> state
                      (assoc-in [:topics topic] texts)
@@ -21,4 +24,3 @@
       (let [results (<! (web :search/get {:topic (name topic)
                                           :text  text}))]
         (set-search-results state topic text results)))))
-
