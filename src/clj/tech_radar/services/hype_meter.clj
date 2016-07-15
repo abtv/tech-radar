@@ -26,7 +26,7 @@
                                                 :similarity-threshold similarity-threshold})]
             (swap! cache (fn [cache]
                            (reduce (fn [cache [topic tweets]]
-                                     (assoc-in cache [topic :popular] tweets))
+                                     (assoc-in cache [topic :popular-tweets] tweets))
                                    cache popular-tweets)))
             (let [elapsed-time (/ (double (- (. System (nanoTime)) start)) 1000000.0)]
               (timbre/info (str "hype-meter-job: finish (" elapsed-time " msecs)"))))

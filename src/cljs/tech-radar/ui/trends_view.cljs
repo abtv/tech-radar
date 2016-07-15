@@ -99,7 +99,7 @@
              [:div.col-lg-6
               (let [popular-tweets (-> trends
                                        (current-trend)
-                                       (:popular))]
+                                       (:popular-tweets))]
                 (if (seq popular-tweets)
                   (table-view/table-view (om/computed {} {:texts popular-tweets}))
                   [:span "There is no data yet..."]))]

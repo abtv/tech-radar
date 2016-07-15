@@ -139,13 +139,13 @@
                {:keys [name]} (current-trend menu-items)]
            [:div.row {}
             [:div.col-lg-12 {:id parent-id}
-             (when-let [data (-> trends
-                                 (current-trend)
-                                 (:data)
-                                 (trend-type))]
+             (when-let [hashtags (-> trends
+                                     (current-trend)
+                                     (:hashtags)
+                                     (trend-type))]
                (chart {:id        (cljs.core/name current-trend)
                        :name      name
-                       :data      data
+                       :data      hashtags
                        :parent-id parent-id}))]])]))))
 
 (def chart-view (om/factory ChartView))

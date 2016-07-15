@@ -8,6 +8,6 @@
 
 (defn set-cached-trends [cache trends]
   (swap! cache (fn [cache]
-                 (reduce (fn [cache [topic data]]
-                           (assoc-in cache [topic :data] data))
+                 (reduce (fn [cache [topic hashtags]]
+                           (assoc-in cache [topic :hashtags] hashtags))
                          cache trends))))
