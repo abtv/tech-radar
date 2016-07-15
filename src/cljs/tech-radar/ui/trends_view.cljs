@@ -52,26 +52,30 @@
 
 (defn trends-controls-mobile [{:keys [current-trend set-current-trend
                                       trend-type set-trend-type]}]
-  [:div.row
-   [:div.col-xs-6
-    [:select.combobox.input-large.form-control
-     {:on-change (fn [e]
-                   (set-current-trend (-> e
-                                          .-target
-                                          .-value
-                                          convert/trend-name->trend-item)))}
-     (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
-          (mapv #(trend-select-item % current-trend)))]]
+  (let [selected-trend-value      (convert/trend-item->trend-name current-trend)
+        selected-trend-type-value (convert/trend-type->trend-type-name trend-type)]
+    [:div.row
+     [:div.col-xs-6
+      [:select.combobox.input-large.form-control
+       {:value     selected-trend-value
+        :on-change (fn [e]
+                     (set-current-trend (-> e
+                                            .-target
+                                            .-value
+                                            convert/trend-name->trend-item)))}
+       (->> [:jobs :clojure :jvm :javascript :golang :linux :nosql]
+            (mapv #(trend-select-item % current-trend)))]]
 
-   [:div.col-xs-6
-    [:select.combobox.input-large.form-control
-     {:on-change (fn [e]
-                   (set-trend-type (-> e
-                                       .-target
-                                       .-value
-                                       convert/trend-type-name->trend-type)))}
-     (->> [:daily :weekly :monthly]
-          (mapv #(trend-type-select-item % trend-type)))]]])
+     [:div.col-xs-6
+      [:select.combobox.input-large.form-control
+       {:value     selected-trend-type-value
+        :on-change (fn [e]
+                     (set-trend-type (-> e
+                                         .-target
+                                         .-value
+                                         convert/trend-type-name->trend-type)))}
+       (->> [:daily :weekly :monthly]
+            (mapv #(trend-type-select-item % trend-type)))]]]))
 
 (defui TrendsView
   static om/IQuery
