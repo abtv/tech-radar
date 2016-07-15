@@ -57,8 +57,8 @@
 
     (.addOrderRule hash-tags-axis x-axis false)
     (.draw dimple-chart)
-    (.text (.-titleShape count-axis) name)
-    (.text (.-titleShape hash-tags-axis) "")
+    (.text (.-titleShape count-axis) "count")
+    (.text (.-titleShape hash-tags-axis) "hashtags")
 
     (set-hashtag-click)))
 
