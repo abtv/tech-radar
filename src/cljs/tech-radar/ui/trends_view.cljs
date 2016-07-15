@@ -100,7 +100,9 @@
               (let [popular-tweets (-> trends
                                        (current-trend)
                                        (:popular))]
-                (table-view/table-view (om/computed {} {:texts popular-tweets})))]
+                (if (seq popular-tweets)
+                  (table-view/table-view (om/computed {} {:texts popular-tweets}))
+                  [:span "There is no data yet..."]))]
              [:div.col-lg-6
               (chart-view/chart-view (om/computed props {:trend-type    trend-type
                                                          :current-trend current-trend}))]]]
