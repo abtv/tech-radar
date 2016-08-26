@@ -9,7 +9,7 @@
         all-texts    (.selectAll js/d3 (str "#" (name topic) " text"))
         on-click     (fn [e]
                        (let [text (or (.-y e) e)]
-                         (search/navigate-to-search topic text)))
+                         (search/navigate-to-search topic (str "#" text))))
         set-style-fn (fn [cursor color]
                        (fn [_]
                          (this-as this
